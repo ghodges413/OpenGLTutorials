@@ -1,0 +1,65 @@
+So, here I just wanted to list a few things that I haven't covered.  All these tutorials covered a lot of ground.  Most of them were pretty basic and a few were definitely more advanced.  But there's still some things that were left uncovered.
+
+OpenGL specific:
+Uniform buffer objects
+Atomic buffer objects
+
+Instanced drawing
+Indirect drawing
+
+Geometry shaders
+Tessellation shaders
+
+CubeMaps
+1D or 3D Textures  (we only used 2D textures)
+
+MSAA (a hardware supported anti-aliasing technique used for forward rendering)
+
+Miscellanous:
+S3TC texture compression.  This, I actually want to comment on.  There's a specific texture compression format that all modern GPUs support.  The textures we used were completely uncompressed.  But using S3TC texture compression greatly reduces the memory usage of your textures and since GPUs support them, they're significantly faster.
+
+Cell shading (a form of rendering that was popular in the early 2000s... makes everything look like a comic or toon)
+
+Global Illumination (this is an area of active research):
+Lightmaps
+
+Light Probes
+
+Reflection/Environment maps (cubemaps that approximate reflections per room)
+
+SSAO (screen space ambient occlusion)
+
+Screen space reflections
+
+Scene Management:
+When you have a far greater number of objects, like a huge game level... you need a way of determine which objects to draw and which objects not to draw.  This is commonly referred to as culling.  Some data structures used for this are called:
+
+Binary Spatial Partitioning tree (BSP) (made popular after being used in doom and quake)
+Potentially Visible Set (PVS)
+k-d tree
+octree
+portals
+occlusion culling
+
+A guy actually made a nice video that shows off how the BSP in doom culled non-visible geometry:
+
+https://www.youtube.com/watch?v=e0W65ScZmQw
+
+Here's a nice video explaining the high level overview of how BSP works:
+https://www.youtube.com/watch?v=yTRzfKh4Tg0
+
+That's about it.  Like anything else, there are trends that become popular briefly and then are discarded... some things become permanent standards.  One thing that's popular right now is physically based rendering.
+
+Further Reading:
+
+Nvidia also provides a nice set of free online books called GPU Gems.  There's also the OpenGL red book, the blue book and the orange book.
+
+Also, a nice high level overview of game engine design was written by Jason Gregory (lead programmer at Naughty Dog) called Game Engine Architecture (2nd edition):
+
+http://www.amazon.com/Game-Engine-Architecture-Second-Edition/dp/1466560010/ref=dp_ob_title_bk
+
+We also never covered collision detection.  A nice book covering this subject is called Real-Time Collision Detection by Christer Ericson:
+
+http://www.amazon.com/Real-Time-Collision-Detection-Interactive-Technology/dp/1558607323
+
+And we also didn't cover anything on AI.  There's a book called Artificial Intelligence A Modern Approach by Stuart Russell and Peter Norvig
