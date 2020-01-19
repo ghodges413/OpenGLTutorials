@@ -15,7 +15,7 @@ layout( binding = 0 ) uniform sampler2D textureDepth;
 
 struct pointLight_t {
 	vec4 mSphere;	// xyz = position, w = radius, these are in world space coordinates
-	vec4 mColor;		// rgb = color, a = intensity
+	vec4 mColor;	// rgb = color, a = intensity
 };
 
 layout( std430, binding = 1 ) buffer bufferLights {
@@ -92,14 +92,14 @@ void main() {
 	//gl_LocalInvocationID
 	//gl_WorkGroupID
 	ivec2 storePos	= ivec2( gl_GlobalInvocationID.xy );
-	vec2 st				= ( vec2( gl_GlobalInvocationID.xy ) + vec2( 0.5 ) ) / vec2( screenWidth, screenHeight );
+	vec2 st			= ( vec2( gl_GlobalInvocationID.xy ) + vec2( 0.5 ) ) / vec2( screenWidth, screenHeight );
 	
-	float depth			= texture( textureDepth,		st ).r;
+	float depth	= texture( textureDepth, st ).r;
 	
 	uint uDepth = uint( depth * MAX_INT );
 
-	atomicMin( minDepth,	uDepth );
-	atomicMax( maxDepth,	uDepth );
+	atomicMin( minDepth, uDepth );
+	atomicMax( maxDepth, uDepth );
 	
 	// Block until all threads finish the above code
 	barrier();
