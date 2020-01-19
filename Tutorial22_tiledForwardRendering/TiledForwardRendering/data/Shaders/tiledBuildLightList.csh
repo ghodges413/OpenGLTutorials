@@ -48,8 +48,9 @@ layout ( local_size_x = WORK_GROUP_SIZE, local_size_y = WORK_GROUP_SIZE, local_s
 #define MAX_INT 0x7FFFFFFF
 
 // This shares memory between the threads in the current workgroup
-shared uint minDepth			= MAX_UNSIGNED_INT;
-shared uint maxDepth		= 0;
+// Initialization of shared variables is not allowed on declaration
+shared uint minDepth;//		= MAX_INT;
+shared uint maxDepth;//		= 0;
 
 /*
  =======================
@@ -76,6 +77,18 @@ bool IsPointInBox( in vec3 point, in vec3 boundsMin, in vec3 boundsMax ) {
  ==========================
  */
 void main() {
+	//
+	// Initialize the shared variables
+	//
+	
+	minDepth		= MAX_INT;
+	maxDepth		= 0;
+	barrier();
+	
+	//
+	//	Determine the min/max depth values of this tile
+	//
+	
 	//gl_LocalInvocationID
 	//gl_WorkGroupID
 	ivec2 storePos	= ivec2( gl_GlobalInvocationID.xy );
@@ -83,38 +96,42 @@ void main() {
 	
 	float depth			= texture( textureDepth,		st ).r;
 	
-	uint uDepth = uint( depth * MAX_UNSIGNED_INT );
+	uint uDepth = uint( depth * MAX_INT );
 
 	atomicMin( minDepth,	uDepth );
 	atomicMax( maxDepth,	uDepth );
 	
 	// Block until all threads finish the above code
 	barrier();
+	
+	//
+	//	Build the bounds of this tile
+	//
 
 	// Map the depths to -1,1 normalized device coordinates
-	float minDepthZ				= 2.0 * float( minDepth ) / float( MAX_UNSIGNED_INT ) - 1.0;
-	float maxDepthZ			= 2.0 * float( maxDepth ) / float( MAX_UNSIGNED_INT ) - 1.0;
+	float minDepthZ			= 2.0 * float( minDepth ) / float( MAX_INT ) - 1.0;
+	float maxDepthZ			= 2.0 * float( maxDepth ) / float( MAX_INT ) - 1.0;
 	
 	// Map the integer coordinates to -1,1 normalized device coordinates
 	const float numGroupsX	= float( screenWidth ) / float( WORK_GROUP_SIZE );
-	const float xWidth			= float( WORK_GROUP_SIZE ) / float( screenWidth );
-	float x							= 2.0 * ( float( gl_WorkGroupID.x ) + 0.5 ) / numGroupsX - 1.0;	// map from 0,1 to -1,1
-	float xmin						= x - xWidth;
-	float xmax						= x + xWidth;
+	const float xWidth		= float( WORK_GROUP_SIZE ) / float( screenWidth );
+	float x					= 2.0 * ( float( gl_WorkGroupID.x ) + 0.5 ) / numGroupsX - 1.0;	// map from 0,1 to -1,1
+	float xmin				= x - xWidth;
+	float xmax				= x + xWidth;
 	
 	// Map the integer coordinates to -1,1 normalized device coordinates
 	const float numGroupsY	= float( screenHeight ) / float( WORK_GROUP_SIZE );
-	const float yWidth			= float( WORK_GROUP_SIZE ) / float( screenHeight );
-	float y							= 2.0 * ( float( gl_WorkGroupID.y ) + 0.5 ) / numGroupsY - 1.0;	// map from 0,1 to -1,1
-	float ymin						= y - yWidth;
-	float ymax						= y + yWidth;
+	const float yWidth		= float( WORK_GROUP_SIZE ) / float( screenHeight );
+	float y					= 2.0 * ( float( gl_WorkGroupID.y ) + 0.5 ) / numGroupsY - 1.0;	// map from 0,1 to -1,1
+	float ymin				= y - yWidth;
+	float ymax				= y + yWidth;
 	
 	// Calculate bounds in -1,1 normalized device coordinates
-	vec3 boundsMin		= vec3( xmin, ymin, minDepthZ );
+	vec3 boundsMin	= vec3( xmin, ymin, minDepthZ );
 	vec3 boundsMax	= vec3( xmax, ymax, maxDepthZ );
 	
 	// Transform the bounds from NDC to view space
-	vec4 mins		= matProjInv * vec4( boundsMin, 1.0 );
+	vec4 mins	= matProjInv * vec4( boundsMin, 1.0 );
 	vec4 maxs	= matProjInv * vec4( boundsMax, 1.0 );
 	
 	boundsMin	= mins.xyz / mins.w;
@@ -122,7 +139,7 @@ void main() {
 
 	// Hack fix for ensuring the bounds aren't backwards
 	vec3 center	= 0.5 * ( boundsMin + boundsMax );
-	vec3 diff		= 0.5 * abs( boundsMax - boundsMin );
+	vec3 diff	= 0.5 * abs( boundsMax - boundsMin );
 	
 	boundsMin	= center - diff;
 	boundsMax	= center + diff;
@@ -140,7 +157,7 @@ void main() {
 	//
 	for ( int i = threadID; i < maxLights; i += threadsPerWorkGroup ) {
 		vec4 lightPointViewSpace	= matView * vec4( pointLights[ i ].mSphere.xyz, 1.0 );
-		vec4 lightSphere				= vec4( lightPointViewSpace.xyz, pointLights[ i ].mSphere.w );
+		vec4 lightSphere			= vec4( lightPointViewSpace.xyz, pointLights[ i ].mSphere.w );
 
 		// Skip this light if the tile is not intersecting the sphere
 		if ( false == IsPointInBox( lightSphere.xyz, boundsMin - vec3( lightSphere.w ), boundsMax + vec3( lightSphere.w ) ) ) {
