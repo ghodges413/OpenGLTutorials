@@ -1,4 +1,6 @@
-Skinning
+# Skinning
+
+![Skinning Screenshot](screenshot.jpg)
 
 Alright, this one is also not really an opengl tutorial.  Instead it's a tutorial on how to skinned meshes.
 

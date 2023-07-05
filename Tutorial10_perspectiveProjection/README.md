@@ -1,4 +1,6 @@
-Perspective Projection
+# Perspective Projection
+
+![Perspective Projection Screenshot](screenshot.jpg)
 
 I should slow down.  But I'm not :(
 

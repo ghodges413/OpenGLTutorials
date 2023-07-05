@@ -1,4 +1,6 @@
-Shadow Mapping
+# Shadow Mapping
+
+![Shadow Mapping Screenshot](screenshot.jpg)
 
 Alright, so our lighting started looking good with the normal mapping.  However, to really render lights properly they need to cast shadows.  There are two techniques to cast shadows in video games, shadow volumes and shadow mapping.
 

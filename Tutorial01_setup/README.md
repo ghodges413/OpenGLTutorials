@@ -1,3 +1,7 @@
+# Setup
+
+![Setup Screenshot](screenshot.jpg)
+
 Hey guys,
 
 I know it's been a while since I've sent a programming email.  I figured that's probably over due to finally get around to fulfilling the promise of providing OpenGL tutorials.

@@ -1,4 +1,6 @@
-Matrices!!!
+# Matrices!!!
+
+![Matrices Screenshot](screenshot.jpg)
 
 Matrices can be used to transform vectors.  And this is exactly how we use them in OpenGL.  Again, I could explain this, or provide a nice video tutorial:
 

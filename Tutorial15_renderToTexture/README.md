@@ -1,4 +1,6 @@
-Render to Texture
+# Render to Texture
+
+![Render to Texture Screenshot](screenshot.jpg)
 
 It's rather common in computer graphics to want to render something offscreen.  An example might be in a game where there's a security camera and a terminal displaying what the camera sees.  In that situation we need to render the view from the security camera to a texture, then use that texture on the terminal.
 

@@ -1,3 +1,7 @@
+# Draw Arrays
+
+![Draw Arrays Screenshot](screenshot.jpg)
+
 This tutorial does the exact same thing as the previous tutorial.  It renders a blue triangle.  Only this time, instead of using the code:
 
 // Draw a simple triangle

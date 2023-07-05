@@ -1,4 +1,6 @@
-Depth Buffer.
+# Depth Buffer
+
+![Depth Buffer Screenshot](screenshot.jpg)
 
 Okay, I promise this is the last tutorial for a while.  But this one is also important.
 

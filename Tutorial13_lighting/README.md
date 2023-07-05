@@ -1,4 +1,6 @@
-Lighting!
+# Lighting!
+
+![Lighting Screenshot](screenshot.jpg)
 
 This sample finally introduces lighting.  It's a very simple sample that only worries about the diffuse color.  Also note that all the real magic is going to take place in the shader code lit.vsh/fsh.
 

@@ -1,3 +1,7 @@
+# Colored Triangle
+
+![Colored Triangle Screenshot](screenshot.jpg)
+
 Hey Guys,
 
 Last time we looked at how to draw a solid color triangle on the screen using the glVertexPointer function.  This time we're going to look at how to draw a multi-colored triangle on the screen.

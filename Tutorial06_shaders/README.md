@@ -1,3 +1,7 @@
+# Shaders
+
+![Shaders Screenshot](screenshot.jpg)
+
 Alright, so last time we did the interlaced vertex format.  This time, we're going to introduce shaders.  Everything that we've done, up until now, has used the fixed function capabilities of OpenGL.  Fixed function was the old fashioned way of rasterizing triangles.  It was great, in its time, of just drawing textured triangles (we haven't hit textures yet).  But for doing anything more advanced, we'll need to use shaders.
 
 A shader is code that is run on the GPU.  For this introduction we will use a vertex shader and a fragment shader (there's also geometry, tessellation and compute shaders, but we'll get to those later).  Shader code is written in a language called GLSL.  GLSL is a very simple c-like language.

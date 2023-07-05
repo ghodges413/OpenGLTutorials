@@ -1,4 +1,6 @@
-Static Meshes
+# Static Meshes
+
+![Static Meshes Screenshot](screenshot.jpg)
 
 This tutorial isn't really about OpenGL.  We've been doing just fine so far with drawing a simple triangle and then a simple cube.  However, if we ever want to draw something more interesting, we need to be able to load a model that was created using an art package like 3ds max or modo or maya or blender.  So, this tutorial isn't really about OpenGL.
 

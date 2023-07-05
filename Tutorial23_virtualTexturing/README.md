@@ -1,6 +1,6 @@
 # Virtual Texturing
 
-![Virtual Texturing Sample Screenshot](VirtualTexturing.jpg)
+![Virtual Texturing Sample Screenshot](screenshot.jpg)
 
 The implementation here is outlined in JP Van Waveren's white paper, "Software Virtual Textures".  The paper can be found on his website: https://mrelusive.com/publications/papers/Software-Virtual-Textures.pdf
 

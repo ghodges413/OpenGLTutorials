@@ -1,4 +1,6 @@
-Vertex Buffer Object (vbo)
+# Vertex Buffer Object (vbo)
+
+![VBO Screenshot](screenshot.jpg)
 
 Okay, so far, every time we draw something, we send the vertices to OpenGL by passing a pointer to the vertex data.  The only problem with this is that the vertex data has to be copied from main system memory to the gpu's onboard memory, for every single draw.  Copying lots of vertex data gets expensive and slows down our performance.  What are we to do?
 

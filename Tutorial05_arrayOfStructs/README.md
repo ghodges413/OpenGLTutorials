@@ -1,3 +1,7 @@
+# Array of Structs
+
+![Array of Structs Screenshot](screenshot.jpg)
+
 Hey Guys,
 
 So this tutorial is going to do the same exact thing as the previous one.  The difference here is that I've changed the format of the vertex data.  The old way used two different arrays, one for positions and the other for colors:

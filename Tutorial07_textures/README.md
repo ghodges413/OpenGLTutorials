@@ -1,4 +1,6 @@
-Texturing!
+# Texturing!
+
+![Texturing Screenshot](screenshot.jpg)
 
 I know that I just sent a tutorial on shaders.  But I've already got this tutorial on texturing ready.
 

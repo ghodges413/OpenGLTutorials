@@ -1,3 +1,7 @@
+# Triangle
+
+![Triangle Screenshot](screenshot.jpg)
+
 Okay, I was a little bored and decided to just throw out the next tutorial.  This one is very simple, as promised.  It just draws a triangle to the screen.
 
 To make it as simple as possible.  This tutorial uses a very old school OpenGL feature that uses glBegin()/glEnd().  This is going to be deprecated in the next major revision of OpenGL and we will only use it this one time.

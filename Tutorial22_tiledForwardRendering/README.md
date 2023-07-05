@@ -1,4 +1,6 @@
-Tiled Forward Rendering (aka Tiled Forward Lighting)
+# Tiled Forward Rendering (aka Tiled Forward Lighting)
+
+![Tiled Forward Rendering Screenshot](screenshot.jpg)
 
 This is the last tutorial that I have planned.  And it covers the latest development in rendering.  In fact, this is how all the latest AAA games, that I know, are doing their rendering.  It also requires the latest version of OpenGL ( version 4.4 )... so if the last tutorial didn't run on your hardware... then unfortunately this one won't run either.
 

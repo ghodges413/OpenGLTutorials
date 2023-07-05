@@ -1,4 +1,6 @@
-Deferred Shading
+# Deferred Shading
+
+![Deferred Shading Screenshot](screenshot.jpg)
 
 I know I'm going really really fast.  Especially as these tutorials get more and more complicated.  But I have another friend that wanted a copy of these, so I'm going fast for his benefit.  Of course it also works out for you guys... even if it's difficult to consume these as quickly as I'm moving.
 

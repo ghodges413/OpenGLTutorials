@@ -1,4 +1,6 @@
-Projective Texturing
+# Projective Texturing
+
+![Projective Texturing Screenshot](screenshot.jpg)
 
 Projective texturing is a very important texturing technique.  The basic concept works the same way that a film projector or a flashlight works.
 

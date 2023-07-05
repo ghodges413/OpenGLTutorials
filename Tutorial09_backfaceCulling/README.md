@@ -1,4 +1,6 @@
-Back Face Culling!
+# Back Face Culling!
+
+![Back Face Culling Screenshot](screenshot.jpg)
 
 Okay, I know this is a lot of tutorials back to back.  But I'm a little bored this lazy Sunday.
 

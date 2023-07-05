@@ -1,4 +1,6 @@
-Compute Shaders
+# Compute Shaders
+
+![Compute Shaders Screenshot](screenshot.jpg)
 
 Okay, this is the second to last tutorial in OpenGL that I have planned.  It touches upon the latest developments in OpenGL (requires OpenGL 4.3) so I'm not sure this will even run on your hardware.  If it does, then great... if not, then you've already had an excellent introduction into OpenGL.... deferred shading + skinning + shadow maps gives you everything you need to make a modernish looking game.
 

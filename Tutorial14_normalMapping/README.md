@@ -1,4 +1,6 @@
-Normal Mapping
+# Normal Mapping
+
+![Normal Mapping Screenshot](screenshot.jpg)
 
 Okay, so last time we took our first step into lighting.  And it looked pretty good.  However, the normals were only defined for each vertex.  So that makes the model look kinda flat.  What if we want a model to appear to have more geometric detail?
 
