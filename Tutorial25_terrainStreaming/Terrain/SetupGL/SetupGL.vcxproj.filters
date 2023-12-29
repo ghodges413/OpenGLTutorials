@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="code">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="code\Terrain">
+      <UniqueIdentifier>{3654042b-1d79-41dd-b7ef-48204285f80e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\code\winmain.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Vector.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Shader.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Fileio.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\MatrixOps.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Mesh.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\RenderSurface.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Matrix.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Time.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\VertexArrayObject.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\VertexBufferObject.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\Heightmap.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\Terrain.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\TerrainTile.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\TerrainFile.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\TerrainVert.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\TerrainPool.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\code\Vector.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Shader.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Fileio.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\MatrixOps.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Array.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Mesh.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\RenderSurface.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Matrix.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Time.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\VertexArrayObject.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\VertexBufferObject.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Pair.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Types.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\Heightmap.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\Terrain.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Bounds.h">
+      <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\TerrainTile.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\TerrainFile.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\TerrainVert.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\TerrainPool.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
