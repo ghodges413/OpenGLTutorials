@@ -95,9 +95,6 @@ void CreateTerrainlet( terrainlet_t * terra ) {
 
 	// Create the VBO
 	const int stride = sizeof( terrainVert_t );
-// 	for ( int i = 0; i < TERRAINLET_SIZE * TERRAINLET_SIZE; i++ ) {
-// 		terra->verts[ i ] = data[ i ];
-// 	}
 	const int size = TERRAINLET_SIZE * TERRAINLET_SIZE * stride;
 	terra->vbo.Generate( GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW );
     
@@ -130,21 +127,6 @@ void CreateTerrainlet( terrainlet_t * terra ) {
 	terra->vao.UnBind();
 	terra->vbo.UnBind();
 	terra->ibo.UnBind();
-}
-
-/*
-================================
-CreateTerrainlet
-================================
-*/
-void CreateTerrainlet( terrainlet_t * terra, terrainVert_t * data ) {
-	CreateTerrainlet( terra );
-
-	// Create the VBO
-	for ( int i = 0; i < TERRAINLET_SIZE * TERRAINLET_SIZE; i++ ) {
-		terra->verts[ i ] = data[ i ];
-	}
-	terra->vbo.Update( terra->verts );
 }
 
 /*
