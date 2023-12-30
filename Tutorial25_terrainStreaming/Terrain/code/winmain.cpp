@@ -125,35 +125,7 @@ void DrawFrame( void ) {
 	Frustum viewFrustum;
 	viewFrustum.Build( matProj, g_matView );
 
-	//Bounds bounds = viewFrustum.m_bounds;
-	Bounds bounds;
-	Vec3d lookdir = lookat - g_cameraPos;
-	lookdir.Normalize();
-	bounds.AddPoint( g_cameraPos + lookdir * 10000.0f );
-	bounds.AddPoint( g_cameraPos + lookdir * 8000.0f );
-	Vec3d right = lookdir.Cross( g_cameraUp );
-	right.Normalize();
-	bounds.AddPoint( g_cameraPos + right * 500.0f );
-	bounds.AddPoint( g_cameraPos - right * 500.0f );
-	bounds.AddPoint( g_cameraPos + g_cameraUp * 500.0f );
-	bounds.AddPoint( g_cameraPos - g_cameraUp * 500.0f );
-	//bounds.AddPoint( g_cameraPos );
-
-	bounds.Clear();
-	bounds.min = Vec3d( -5000, -500, -50 );
-	bounds.max = Vec3d( -3000, 500, 50 );
-
-// 	if ( !viewFrustum.m_bounds.IntersectBounds( bounds ) ) {
-// 		Frustum view;
-// 		view.Build( matProj, g_matView );
-// 		printf( "weird\n" );
-// 	} else {
-// 		//printf( "ok\n" );
-// 	}
-
-	bounds = viewFrustum.m_bounds;
-
-	g_terrain.Update( g_cameraPos, bounds );
+	g_terrain.Update( g_cameraPos, viewFrustum );
 
 	//
 	//	Fill the depth buffer

@@ -22,7 +22,7 @@ public:
 
 	void Terraform();
 	void Update( Vec3d pos );
-	void Update( Vec3d pos, Bounds view );
+	void Update( Vec3d pos, Frustum view );
 	void Draw();
 	void DrawDebug( class Shader * shader );
 	Vec3d GetSurfacePos( Vec3d pos ) const;

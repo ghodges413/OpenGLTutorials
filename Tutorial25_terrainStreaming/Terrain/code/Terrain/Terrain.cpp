@@ -37,13 +37,13 @@ void Terrain::Terraform() {
 DetermineDrawList_r
 ================================
 */
-void DetermineDrawList_r( terrainNode_t * node, int tileX, int tileY, int depth, int maxDepth, Vec3d pos, Bounds view, int boundsWidth, terrainNode_t ** list, int & numNodes ) {
+void DetermineDrawList_r( terrainNode_t * node, int tileX, int tileY, int depth, int maxDepth, Vec3d pos, Frustum view, int boundsWidth, terrainNode_t ** list, int & numNodes ) {
 	if ( NULL == node ) {
 		return;
 	}
 
 	// view frustum culling
-	if ( !view.IntersectBounds( node->bounds ) ) {
+	if ( !view.IntersectBox( node->bounds ) ) {
 		return;
 	}
 
@@ -265,7 +265,7 @@ void Terrain::Update( Vec3d pos ) {
 Terrain::Update
 ================================
 */
-void Terrain::Update( Vec3d pos, Bounds view ) {
+void Terrain::Update( Vec3d pos, Frustum view ) {
 	UpdateIslandPool();
 
 	int maxDepth = GetMaxDepth();
