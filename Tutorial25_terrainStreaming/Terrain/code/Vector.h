@@ -791,6 +791,8 @@ public:
 	
     const float *   ToPtr() const   { return &x; }
 	float *         ToPtr()         { return &x; }
+
+	Vec3d xyz() const { return Vec3d( x, y, z ); }
     
     friend Vec4d operator*( const int& lhs, const Vec4d& rhs );
     friend Vec4d operator*( const float& lhs, const Vec4d& rhs );

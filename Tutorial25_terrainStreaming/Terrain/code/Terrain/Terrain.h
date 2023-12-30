@@ -4,6 +4,7 @@
 #pragma once
 #include "TerrainTile.h"
 #include "TerrainPool.h"
+#include "../Frustum.h"
 
 #define TILES_WIDE 5
 #define NUM_TILES ( TILES_WIDE * TILES_WIDE )
@@ -21,6 +22,7 @@ public:
 
 	void Terraform();
 	void Update( Vec3d pos );
+	void Update( Vec3d pos, Bounds view );
 	void Draw();
 	void DrawDebug( class Shader * shader );
 	Vec3d GetSurfacePos( Vec3d pos ) const;

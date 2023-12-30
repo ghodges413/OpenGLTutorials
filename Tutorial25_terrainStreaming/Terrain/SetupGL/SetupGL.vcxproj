@@ -145,10 +145,12 @@ xcopy /y $(SolutionDir)libs\glew-1.10.0\bin\Release\x64\glew32.dll $(SolutionDir
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\code\Fileio.cpp" />
+    <ClCompile Include="..\code\Frustum.cpp" />
     <ClCompile Include="..\code\Graphics.cpp" />
     <ClCompile Include="..\code\Matrix.cpp" />
     <ClCompile Include="..\code\MatrixOps.cpp" />
     <ClCompile Include="..\code\Mesh.cpp" />
+    <ClCompile Include="..\code\Plane.cpp" />
     <ClCompile Include="..\code\RenderSurface.cpp" />
     <ClCompile Include="..\code\Shader.cpp" />
     <ClCompile Include="..\code\Terrain\Heightmap.cpp" />
@@ -167,11 +169,13 @@ xcopy /y $(SolutionDir)libs\glew-1.10.0\bin\Release\x64\glew32.dll $(SolutionDir
     <ClInclude Include="..\code\Array.h" />
     <ClInclude Include="..\code\Bounds.h" />
     <ClInclude Include="..\code\Fileio.h" />
+    <ClInclude Include="..\code\Frustum.h" />
     <ClInclude Include="..\code\Graphics.h" />
     <ClInclude Include="..\code\Matrix.h" />
     <ClInclude Include="..\code\MatrixOps.h" />
     <ClInclude Include="..\code\Mesh.h" />
     <ClInclude Include="..\code\Pair.h" />
+    <ClInclude Include="..\code\Plane.h" />
     <ClInclude Include="..\code\RenderSurface.h" />
     <ClInclude Include="..\code\Shader.h" />
     <ClInclude Include="..\code\Terrain\Heightmap.h" />

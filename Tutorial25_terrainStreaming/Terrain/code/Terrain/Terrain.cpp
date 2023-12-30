@@ -37,10 +37,16 @@ void Terrain::Terraform() {
 DetermineDrawList_r
 ================================
 */
-void DetermineDrawList_r( terrainNode_t * node, int tileX, int tileY, int depth, int maxDepth, Vec3d pos, int boundsWidth, terrainNode_t ** list, int & numNodes ) {
+void DetermineDrawList_r( terrainNode_t * node, int tileX, int tileY, int depth, int maxDepth, Vec3d pos, Bounds view, int boundsWidth, terrainNode_t ** list, int & numNodes ) {
 	if ( NULL == node ) {
 		return;
 	}
+
+	// view frustum culling
+	if ( !view.IntersectBounds( node->bounds ) ) {
+		return;
+	}
+
 	node->doRender = false;
 	node->depth = depth;
 
@@ -56,10 +62,10 @@ void DetermineDrawList_r( terrainNode_t * node, int tileX, int tileY, int depth,
 
 	const Bounds bounds( pos - Vec3d( boundsWidth ), pos + Vec3d( boundsWidth ) );
 	if ( node->bounds.IntersectBounds2D( bounds ) ) {
-		DetermineDrawList_r( node->nodes[ 0 ], tileX, tileY, depth + 1, maxDepth, pos, boundsWidth >> 1, list, numNodes );
-		DetermineDrawList_r( node->nodes[ 1 ], tileX, tileY, depth + 1, maxDepth, pos, boundsWidth >> 1, list, numNodes );
-		DetermineDrawList_r( node->nodes[ 2 ], tileX, tileY, depth + 1, maxDepth, pos, boundsWidth >> 1, list, numNodes );
-		DetermineDrawList_r( node->nodes[ 3 ], tileX, tileY, depth + 1, maxDepth, pos, boundsWidth >> 1, list, numNodes );
+		DetermineDrawList_r( node->nodes[ 0 ], tileX, tileY, depth + 1, maxDepth, pos, view, boundsWidth >> 1, list, numNodes );
+		DetermineDrawList_r( node->nodes[ 1 ], tileX, tileY, depth + 1, maxDepth, pos, view, boundsWidth >> 1, list, numNodes );
+		DetermineDrawList_r( node->nodes[ 2 ], tileX, tileY, depth + 1, maxDepth, pos, view, boundsWidth >> 1, list, numNodes );
+		DetermineDrawList_r( node->nodes[ 3 ], tileX, tileY, depth + 1, maxDepth, pos, view, boundsWidth >> 1, list, numNodes );
 		return;
 	}
 
@@ -246,7 +252,33 @@ void Terrain::Update( Vec3d pos ) {
 		for ( int x = 0; x < TILES_WIDE; x++ ) {
 			int tileId = x + y * TILES_WIDE;
 			TerrainTile * tile = &m_tiles[ tileId ];
-			DetermineDrawList_r( tile->m_root, x, y, 0, maxDepth, pos, width, m_renderNodes, m_numRenderNodes );
+//			DetermineDrawList_r( tile->m_root, x, y, 0, maxDepth, pos, width, m_renderNodes, m_numRenderNodes );
+		}
+	}
+
+	// Stitch the terrainlet seams by determining the lods of the neighbor terrainlets
+	StitchTerrainSeams();
+}
+
+/*
+================================
+Terrain::Update
+================================
+*/
+void Terrain::Update( Vec3d pos, Bounds view ) {
+	UpdateIslandPool();
+
+	int maxDepth = GetMaxDepth();
+	int width = 256;
+
+	m_numRenderNodes = 0;
+
+	// Determine the nodes that are to be rendered
+	for ( int y = 0; y < TILES_WIDE; y++ ) {
+		for ( int x = 0; x < TILES_WIDE; x++ ) {
+			int tileId = x + y * TILES_WIDE;
+			TerrainTile * tile = &m_tiles[ tileId ];
+			DetermineDrawList_r( tile->m_root, x, y, 0, maxDepth, pos, view, width, m_renderNodes, m_numRenderNodes );
 		}
 	}
 
