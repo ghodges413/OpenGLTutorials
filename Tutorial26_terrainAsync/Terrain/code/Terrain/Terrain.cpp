@@ -102,7 +102,7 @@ void DetermineDrawList_r( terrainNode_t * node, int tileX, int tileY, int depth,
 UpdateVBO
 ================================
 */
-static terrainVert_t g_vertsTmp[ TERRAINLET_SIZE * TERRAINLET_SIZE ];
+static terrainVert_t g_vertsTmp[ terrainIsland_SIZE * terrainIsland_SIZE ];
 void UpdateVBO( terrainNode_t * node ) {
 	const int depth = node->depth;
 
@@ -129,24 +129,24 @@ void UpdateVBO( terrainNode_t * node ) {
 // 	}
 
 	// Use the lods/depths of the neighbors to collapse edges appropriately
-	terrainlet_t * terra = GetIsland( node->terraID );
+	terrainIsland_t * terra = GetIsland( node->terraID );
 	if ( NULL == terra ) {
 		return;
 	}
 
-	memcpy( g_vertsTmp, terra->verts, sizeof( terrainVert_t ) * TERRAINLET_SIZE * TERRAINLET_SIZE );
+	memcpy( g_vertsTmp, terra->verts, sizeof( terrainVert_t ) * terrainIsland_SIZE * terrainIsland_SIZE );
 
 	// Collapse px side (if our depth is deeper than the neighbors)
 	const int dpx = node->neighborLODs[ 0 ];
 	if ( depth > dpx && dpx >= 0 ) {
 		int delta = depth - dpx;
 		int skipVerts = 1 << delta;
-		for ( int y = 0; y < TERRAINLET_SIZE - skipVerts; y += skipVerts ) {
-			int x = TERRAINLET_SIZE - 1;
-			int idx = x + y * TERRAINLET_SIZE;
+		for ( int y = 0; y < terrainIsland_SIZE - skipVerts; y += skipVerts ) {
+			int x = terrainIsland_SIZE - 1;
+			int idx = x + y * terrainIsland_SIZE;
 
 			for ( int y2 = 1; y2 < skipVerts; y2++ ) {
-				int idx2 = x + ( y + y2 ) * TERRAINLET_SIZE;
+				int idx2 = x + ( y + y2 ) * terrainIsland_SIZE;
 				g_vertsTmp[ idx2 ] = g_vertsTmp[ idx ];
 			}
 		}
@@ -157,12 +157,12 @@ void UpdateVBO( terrainNode_t * node ) {
 	if ( depth > dnx && dnx >= 0 ) {
 		int delta = depth - dnx;
 		int skipVerts = 1 << delta;
-		for ( int y = 0; y < TERRAINLET_SIZE - skipVerts; y += skipVerts ) {
+		for ( int y = 0; y < terrainIsland_SIZE - skipVerts; y += skipVerts ) {
 			int x = 0;
-			int idx = x + y * TERRAINLET_SIZE;
+			int idx = x + y * terrainIsland_SIZE;
 
 			for ( int y2 = 1; y2 < skipVerts; y2++ ) {
-				int idx2 = x + ( y + y2 ) * TERRAINLET_SIZE;
+				int idx2 = x + ( y + y2 ) * terrainIsland_SIZE;
 				g_vertsTmp[ idx2 ] = g_vertsTmp[ idx ];
 			}
 		}
@@ -173,12 +173,12 @@ void UpdateVBO( terrainNode_t * node ) {
 	if ( depth > dpy && dpy >= 0 ) {
 		int delta = depth - dpy;
 		int skipVerts = 1 << delta;
-		for ( int x = 0; x < TERRAINLET_SIZE - skipVerts; x += skipVerts ) {
-			int y = TERRAINLET_SIZE - 1;
-			int idx = x + y * TERRAINLET_SIZE;
+		for ( int x = 0; x < terrainIsland_SIZE - skipVerts; x += skipVerts ) {
+			int y = terrainIsland_SIZE - 1;
+			int idx = x + y * terrainIsland_SIZE;
 
 			for ( int x2 = 1; x2 < skipVerts; x2++ ) {
-				int idx2 = ( x + x2 ) + y * TERRAINLET_SIZE;
+				int idx2 = ( x + x2 ) + y * terrainIsland_SIZE;
 				g_vertsTmp[ idx2 ] = g_vertsTmp[ idx ];
 			}
 		}
@@ -189,12 +189,12 @@ void UpdateVBO( terrainNode_t * node ) {
 	if ( depth > dny && dny >= 0 ) {
 		int delta = depth - dny;
 		int skipVerts = 1 << delta;
-		for ( int x = 0; x < TERRAINLET_SIZE - skipVerts; x += skipVerts ) {
+		for ( int x = 0; x < terrainIsland_SIZE - skipVerts; x += skipVerts ) {
 			int y = 0;
-			int idx = x + y * TERRAINLET_SIZE;
+			int idx = x + y * terrainIsland_SIZE;
 
 			for ( int x2 = 1; x2 < skipVerts; x2++ ) {
-				int idx2 = ( x + x2 ) + y * TERRAINLET_SIZE;
+				int idx2 = ( x + x2 ) + y * terrainIsland_SIZE;
 				g_vertsTmp[ idx2 ] = g_vertsTmp[ idx ];
 			}
 		}
@@ -273,7 +273,7 @@ void Terrain::Update( Vec3d pos ) {
 		}
 	}
 
-	// Stitch the terrainlet seams by determining the lods of the neighbor terrainlets
+	// Stitch the terrainIsland seams by determining the lods of the neighbor terrainIslands
 	StitchTerrainSeams();
 }
 
@@ -319,7 +319,7 @@ void Terrain::Update( Vec3d pos, Frustum view ) {
 		}
 	}
 
-	// Stitch the terrainlet seams by determining the lods of the neighbor terrainlets
+	// Stitch the terrainIsland seams by determining the lods of the neighbor terrainIslands
 	StitchTerrainSeams();
 }
 

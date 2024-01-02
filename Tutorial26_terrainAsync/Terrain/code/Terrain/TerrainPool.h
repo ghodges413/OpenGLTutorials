@@ -7,12 +7,12 @@
 
 
 struct terrainVert_t;
-struct terrainlet_t;
+struct terrainIsland_t;
 class TerrainTileFile;
 struct poolEntry_t;
 
 struct poolEntry_t {
-	terrainlet_t terra;
+	terrainIsland_t terra;
 	int mruCounter;
 	bool wasUsedLastFrame;
 	int mapId;
@@ -28,7 +28,7 @@ poolEntry_t * GetPoolEntry( int id );
 void TouchIsland( int tileX, int tileY, int depth, int x, int y );
 
 int RequestIsland( int tileX, int tileY, int depth, int x, int y );
-terrainlet_t * GetIsland( int id );
+terrainIsland_t * GetIsland( int id );
 
 void UpdateIslandPool();
 

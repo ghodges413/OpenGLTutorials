@@ -22,7 +22,7 @@ void WriteTerrainFile( int tileX, int tileY );
 ================================
 TerrainTileFile
 A memory mapped file for a terrain tile.
-Used for streaming terrainlet's into memory.
+Used for streaming terrainIsland's into memory.
 ================================
 */
 class TerrainTileFile {
@@ -34,7 +34,7 @@ public:
 	bool WriteFile( TerrainTile * tile );	// Probably shouldn't actually use the tile (maybe the height map?)
 	bool ReadHeightmap( float * heightmap );
 	bool ReadBounds( Bounds ** buffer );
-	bool ReadTerrainlet( int x, int y, int depth, void * buffer );
+	bool ReadTerrainIsland( int x, int y, int depth, void * buffer );
 
 private:
 	FILE * m_file;

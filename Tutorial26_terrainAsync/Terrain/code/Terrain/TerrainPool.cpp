@@ -16,26 +16,26 @@ extern int GetMaxDepth();
 
 /*
 ================================
-GetTerrainletsPerTile
+GetTerrainIslandsPerTile
 ================================
 */
-int GetTerrainletsPerTile() {
+int GetTerrainIslandsPerTile() {
 	int maxDepth = GetMaxDepth();
 
-	// Calculate the number of terrainlets in a tile
+	// Calculate the number of terrainIslands in a tile
 	// 1 + 4 + 16 + 32 + 64...
-	int numTerrainlets = 0;
+	int numterrainIslands = 0;
 	for ( int i = 0; i <= maxDepth; i++ ) {
-		numTerrainlets += ( 1 << ( i * 2 ) );
+		numterrainIslands += ( 1 << ( i * 2 ) );
 	}
 
-	return numTerrainlets;
+	return numterrainIslands;
 }
 
 #define ISLAND_POOL_SIZE 128	// We only ever use 50-70ish islands in practice
 
 // struct poolEntry_t {
-// 	terrainlet_t terra;
+// 	terrainIsland_t terra;
 // 	int mruCounter;
 // 	bool wasUsedLastFrame;
 // 	int mapId;
@@ -76,7 +76,7 @@ void InitIslandPool() {
 		return;
 	}
 
-	int numIslandsPerTile = GetTerrainletsPerTile();
+	int numIslandsPerTile = GetTerrainIslandsPerTile();
 	int size = sizeof( int ) * numIslandsPerTile * NUM_TILES;
 	s_islandMap = (int *)malloc( size );
 	memset( s_islandMap, 0, size );
@@ -87,7 +87,7 @@ void InitIslandPool() {
 	// Initialize the pool entries
 	for ( int i = 0; i < ISLAND_POOL_SIZE; i++ ) {
 		poolEntry_t & entry = s_islandPool[ i ];
-		CreateTerrainlet( &entry.terra );
+		CreateterrainIsland( &entry.terra );
 		entry.mruCounter = -1;
 		entry.mapId = -1;
 		entry.wasUsedLastFrame = false;
@@ -121,13 +121,13 @@ GetIslandID
 ================================
 */
 int GetIslandID( int depth, int x, int y ) {
-	int numTerrainlets = 0;
+	int numterrainIslands = 0;
 	int numTilesWide = 1 << depth;
 	for ( int i = 0; i < depth; i++ ) {
-		numTerrainlets += ( 1 << ( i * 2 ) );
+		numterrainIslands += ( 1 << ( i * 2 ) );
 	}
 
-	int islandId = numTerrainlets + x + y * numTilesWide;
+	int islandId = numterrainIslands + x + y * numTilesWide;
 	return islandId;
 }
 
@@ -138,7 +138,7 @@ void TouchIsland( int tileX, int tileY, int depth, int x, int y ) {
 	int tileId = tileX + tileY * TILES_WIDE;
 	int islandId = GetIslandID( depth, x, y );
 
-	int numIslandsPerTile = GetTerrainletsPerTile();
+	int numIslandsPerTile = GetTerrainIslandsPerTile();
 	int mapId = numIslandsPerTile * tileId + islandId;
 
 	// Check if this island has already been streamed
@@ -159,7 +159,7 @@ int RequestIsland( int tileX, int tileY, int depth, int x, int y ) {
 	int tileId = tileX + tileY * TILES_WIDE;
 	int islandId = GetIslandID( depth, x, y );
 
-	int numIslandsPerTile = GetTerrainletsPerTile();
+	int numIslandsPerTile = GetTerrainIslandsPerTile();
 	int mapId = numIslandsPerTile * tileId + islandId;
 
 	// Check if this island has already been streamed
@@ -203,7 +203,7 @@ int RequestIsland( int tileX, int tileY, int depth, int x, int y ) {
 			PushStreamerCmd( cmd );
 #else
 			poolEntry_t & entry = s_islandPool[ idx ];
- 			s_files[ tileId ].ReadTerrainlet( x, y, depth, entry.terra.verts );
+ 			s_files[ tileId ].ReadterrainIsland( x, y, depth, entry.terra.verts );
 			entry.terra.vbo.Update( entry.terra.verts );
 			entry.isLoaded = true;
 #endif
@@ -219,7 +219,7 @@ int RequestIsland( int tileX, int tileY, int depth, int x, int y ) {
 GetIsland
 ================================
 */
-terrainlet_t * GetIsland( int id ) {
+terrainIsland_t * GetIsland( int id ) {
 	if ( id < 0 ) {
 		return NULL;
 	}
@@ -239,7 +239,7 @@ UpdateIslandPool
 ================================
 */
 void UpdateIslandPool() {
-	int numIslandsPerTile = GetTerrainletsPerTile();
+	int numIslandsPerTile = GetTerrainIslandsPerTile();
 	int numUsed = 0;
 
 	// Loop through the pool and determine what was and wasn't used,

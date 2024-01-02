@@ -400,7 +400,7 @@ void WriteTerrainFile( int tileX, int tileY ) {
 	Bounds bounds;
 
 	// Convert the heightmap data to terrainverts
-	unsigned long size = sizeof( terrainVert_t ) * TERRAINLET_SIZE * TERRAINLET_SIZE;
+	unsigned long size = sizeof( terrainVert_t ) * terrainIsland_SIZE * terrainIsland_SIZE;
 	terrainVert_t * verts = (terrainVert_t *)malloc( size );
 	if ( verts == NULL ) {
 		printf( "wtf!?\n" );
@@ -439,21 +439,21 @@ void WriteTerrainFile( int tileX, int tileY ) {
 		extern int GetMaxDepth();
 		const int maxDepth = GetMaxDepth();
 		for ( int depth = 0; depth <= maxDepth; depth++ ) {
-			const int terrainletsWide = ( 1 << depth );
+			const int terrainIslandsWide = ( 1 << depth );
 
-			for ( int subTileY = 0; subTileY < terrainletsWide; subTileY++ ) {
-				for ( int subTileX = 0; subTileX < terrainletsWide; subTileX++ ) {
+			for ( int subTileY = 0; subTileY < terrainIslandsWide; subTileY++ ) {
+				for ( int subTileX = 0; subTileX < terrainIslandsWide; subTileX++ ) {
 
 					const int widthData = ( TILE_SIZE - 1 ) >> depth;
-					const int skip = widthData / ( TERRAINLET_SIZE - 1 );
+					const int skip = widthData / ( terrainIsland_SIZE - 1 );
 
 					const int offsetX = subTileX * widthData;
 					const int offsetY = subTileY * widthData;
 
 					bounds.Clear();
 
-					for ( int y = 0; y < TERRAINLET_SIZE; y++ ) {
-						for ( int x = 0; x < TERRAINLET_SIZE; x++ ) {
+					for ( int y = 0; y < terrainIsland_SIZE; y++ ) {
+						for ( int x = 0; x < terrainIsland_SIZE; x++ ) {
 							int x2 = x * skip + offsetX;
 							int y2 = y * skip + offsetY;
 							if ( x2 >= TILE_SIZE ) {
@@ -462,7 +462,7 @@ void WriteTerrainFile( int tileX, int tileY ) {
 							if ( y2 >= TILE_SIZE ) {
 								y2 = TILE_SIZE - 1;
 							}
- 							int idx = x + y * TERRAINLET_SIZE;
+ 							int idx = x + y * terrainIsland_SIZE;
 							int idx2 = x2 + y2 * TILE_SIZE;
 
 							Vec3d pos = HeightmapToPos( data[ idx2 ], x2, y2, tileX, tileY );
@@ -486,19 +486,19 @@ void WriteTerrainFile( int tileX, int tileY ) {
 		extern int GetMaxDepth();
 		const int maxDepth = GetMaxDepth();
 		for ( int depth = 0; depth <= maxDepth; depth++ ) {
-			const int terrainletsWide = ( 1 << depth );
+			const int terrainIslandsWide = ( 1 << depth );
 
-			for ( int subTileY = 0; subTileY < terrainletsWide; subTileY++ ) {
-				for ( int subTileX = 0; subTileX < terrainletsWide; subTileX++ ) {
+			for ( int subTileY = 0; subTileY < terrainIslandsWide; subTileY++ ) {
+				for ( int subTileX = 0; subTileX < terrainIslandsWide; subTileX++ ) {
 
 					const int widthData = ( TILE_SIZE - 1 ) >> depth;
-					const int skip = widthData / ( TERRAINLET_SIZE - 1 );
+					const int skip = widthData / ( terrainIsland_SIZE - 1 );
 
 					const int offsetX = subTileX * widthData;
 					const int offsetY = subTileY * widthData;
 
-					for ( int y = 0; y < TERRAINLET_SIZE; y++ ) {
-						for ( int x = 0; x < TERRAINLET_SIZE; x++ ) {
+					for ( int y = 0; y < terrainIsland_SIZE; y++ ) {
+						for ( int x = 0; x < terrainIsland_SIZE; x++ ) {
 							int x2 = x * skip + offsetX;
 							int y2 = y * skip + offsetY;
 							if ( x2 >= TILE_SIZE ) {
@@ -507,7 +507,7 @@ void WriteTerrainFile( int tileX, int tileY ) {
 							if ( y2 >= TILE_SIZE ) {
 								y2 = TILE_SIZE - 1;
 							}
- 							int idx = x + y * TERRAINLET_SIZE;
+ 							int idx = x + y * terrainIsland_SIZE;
 							int idx2 = x2 + y2 * TILE_SIZE;
 
 							terrainVert_t vert = HeightmapToVert( data[ idx2 ], x2, y2, tileX, tileY );
@@ -517,7 +517,7 @@ void WriteTerrainFile( int tileX, int tileY ) {
 					}
 
 					// Write the island to file
-					WriteFileStream( verts, sizeof( terrainVert_t ) * TERRAINLET_SIZE * TERRAINLET_SIZE );
+					WriteFileStream( verts, sizeof( terrainVert_t ) * terrainIsland_SIZE * terrainIsland_SIZE );
 					numWritten++;
 				}
 			}
@@ -582,8 +582,8 @@ bool TerrainTileFile::ReadBounds( Bounds ** buffer ) {
 
 	unsigned int heightmapOffset = sizeof( float ) * TILE_SIZE * TILE_SIZE;
 
-	extern int GetTerrainletsPerTile();
-	unsigned int numIslandsPerTile = (unsigned int)GetTerrainletsPerTile();
+	extern int GetTerrainIslandsPerTile();
+	unsigned int numIslandsPerTile = (unsigned int)GetTerrainIslandsPerTile();
 	unsigned int boundsBufferSize = sizeof( Bounds ) * numIslandsPerTile;
 
 	*buffer = (Bounds*)malloc( boundsBufferSize );
@@ -605,21 +605,21 @@ bool TerrainTileFile::ReadBounds( Bounds ** buffer ) {
 
 /*
 ================================
-TerrainTileFile::ReadTerrainlet
+TerrainTileFile::ReadTerrainIsland
 ================================
 */
-bool TerrainTileFile::ReadTerrainlet( int x, int y, int depth, void * buffer ) {
+bool TerrainTileFile::ReadTerrainIsland( int x, int y, int depth, void * buffer ) {
 	if ( NULL == m_file ) {
 		return false;
 	}
 
 	unsigned int heightmapOffset = sizeof( float ) * TILE_SIZE * TILE_SIZE;
 
-	extern int GetTerrainletsPerTile();
-	unsigned int numIslandsPerTile = (unsigned int)GetTerrainletsPerTile();
+	extern int GetTerrainIslandsPerTile();
+	unsigned int numIslandsPerTile = (unsigned int)GetTerrainIslandsPerTile();
 	unsigned int boundsOffset = sizeof( Bounds ) * numIslandsPerTile;
 
-	unsigned int islandSize = sizeof( terrainVert_t ) * TERRAINLET_SIZE * TERRAINLET_SIZE;
+	unsigned int islandSize = sizeof( terrainVert_t ) * terrainIsland_SIZE * terrainIsland_SIZE;
 
 	extern int GetIslandID( int depth, int x, int y );
 	int islandId = GetIslandID( depth, x, y );

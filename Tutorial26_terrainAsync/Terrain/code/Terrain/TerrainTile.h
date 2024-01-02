@@ -10,7 +10,7 @@
 #define VERTS_PER_METER 2.0f
 #define METERS_PER_VERT ( 1.0f / VERTS_PER_METER )
 
-#define TERRAINLET_SIZE ( 128 + 1 )		// 64m with 2 verts/meter = 64 * 2 = 128
+#define terrainIsland_SIZE ( 128 + 1 )		// 64m with 2 verts/meter = 64 * 2 = 128
 #define TILE_SIZE ( 4096 + 1 )			// 2km with 2 verts/meter = 2048 * 2 = 4096
 
 // The whole terrain is 10km x 10km
@@ -19,17 +19,17 @@
 // The tiles are quad trees, and the sectors are the leafs of the trees
 // The root node of each quad tree is always resident
 
-// Every terrainlet is 128 verts x 128 verts
-struct terrainlet_t {	// bad name, think of something better (terrainlet_t?)
+// Every terrainIsland is 128 verts x 128 verts
+struct terrainIsland_t {	// bad name, think of something better (terrainIsland_t?)
 	VertexBufferObject vbo;
 	VertexArrayObject vao;
 
-	terrainVert_t verts[ TERRAINLET_SIZE * TERRAINLET_SIZE ];
+	terrainVert_t verts[ terrainIsland_SIZE * terrainIsland_SIZE ];
 
 	static VertexBufferObject ibo;	// this could be static and used across all of them
-	static unsigned short indices[ TERRAINLET_SIZE * TERRAINLET_SIZE * 6 ];	// this could be static and used across all of them
+	static unsigned short indices[ terrainIsland_SIZE * terrainIsland_SIZE * 6 ];	// this could be static and used across all of them
 };
-void CreateTerrainlet( terrainlet_t * terra );
+void CreateterrainIsland( terrainIsland_t * terra );
 
 struct terrainNode_t {	// One of the nodes in the quad tree
 	terrainNode_t( Bounds * boundsData, int tileX, int tileY, int x, int y, int depth );

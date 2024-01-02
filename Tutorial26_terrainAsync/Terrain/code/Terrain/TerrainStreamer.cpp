@@ -71,7 +71,7 @@ ThreadReturnType_t TerrainStreamer( ThreadInputType_t data ) {
 			poolEntry_t * entry = GetPoolEntry( cmd->poolId );
 			if ( !entry->isLoaded ) {
 				TerrainTileFile * file = GetTerrainTileFile( cmd->tileX, cmd->tileY );
- 				file->ReadTerrainlet( cmd->x, cmd->y, cmd->depth, entry->terra.verts );
+ 				file->ReadTerrainIsland( cmd->x, cmd->y, cmd->depth, entry->terra.verts );
 				entry->isLoaded = true;
 			}
 		}

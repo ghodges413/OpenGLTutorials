@@ -14,8 +14,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
-VertexBufferObject terrainlet_t::ibo;
-unsigned short terrainlet_t::indices[ TERRAINLET_SIZE * TERRAINLET_SIZE * 6 ];
+VertexBufferObject terrainIsland_t::ibo;
+unsigned short terrainIsland_t::indices[ terrainIsland_SIZE * terrainIsland_SIZE * 6 ];
 
 extern float frac( float value );
 
@@ -26,9 +26,9 @@ GetMaxDepth
 */
 int GetMaxDepth() {
 	int tileSize = TILE_SIZE - 1;
-	int terrainlet = TERRAINLET_SIZE - 1;
+	int terrainIsland = terrainIsland_SIZE - 1;
 	int maxDepth = 0;
-	while ( terrainlet != tileSize ) {
+	while ( terrainIsland != tileSize ) {
 		tileSize >>= 1;
 		maxDepth++;
 	}
@@ -38,10 +38,10 @@ int GetMaxDepth() {
 
 /*
 ================================
-DrawTerrainlet
+DrawterrainIsland
 ================================
 */
-void DrawTerrainlet( terrainlet_t * terra ) {
+void DrawterrainIsland( terrainIsland_t * terra ) {
 	if ( NULL == terra ) {
 		return;
 	}
@@ -50,32 +50,32 @@ void DrawTerrainlet( terrainlet_t * terra ) {
     terra->vao.Bind();
     
     // Draw
-	const int num = TERRAINLET_SIZE * TERRAINLET_SIZE * 6;
+	const int num = terrainIsland_SIZE * terrainIsland_SIZE * 6;
 	glDrawElements( GL_TRIANGLES, num, GL_UNSIGNED_SHORT, 0 );
 
 	// Unbind the VAO
 	terra->vao.UnBind();
 }
 void DrawTerraID( int id ) {
-	DrawTerrainlet( GetIsland( id ) );
+	DrawterrainIsland( GetIsland( id ) );
 }
 
 
 /*
 ================================
-CreateTerrainlet
+CreateterrainIsland
 ================================
 */
-void CreateTerrainlet( terrainlet_t * terra ) {
+void CreateterrainIsland( terrainIsland_t * terra ) {
 	// Create the index buffer (if it doesn't already exist)
 	if ( !terra->ibo.IsValid() ) {
 		int idx = 0;
-		for ( int y = 0; y < TERRAINLET_SIZE - 1; y++ ) {
-			for ( int x = 0; x < TERRAINLET_SIZE - 1; x++ ) {
-				int idxA = ( x + 0 ) + ( y + 0 ) * TERRAINLET_SIZE;
-				int idxB = ( x + 0 ) + ( y + 1 ) * TERRAINLET_SIZE;
-				int idxC = ( x + 1 ) + ( y + 1 ) * TERRAINLET_SIZE;
-				int idxD = ( x + 1 ) + ( y + 0 ) * TERRAINLET_SIZE;
+		for ( int y = 0; y < terrainIsland_SIZE - 1; y++ ) {
+			for ( int x = 0; x < terrainIsland_SIZE - 1; x++ ) {
+				int idxA = ( x + 0 ) + ( y + 0 ) * terrainIsland_SIZE;
+				int idxB = ( x + 0 ) + ( y + 1 ) * terrainIsland_SIZE;
+				int idxC = ( x + 1 ) + ( y + 1 ) * terrainIsland_SIZE;
+				int idxD = ( x + 1 ) + ( y + 0 ) * terrainIsland_SIZE;
 
 				terra->indices[ idx + 0 ] = (unsigned short)idxA;
 				terra->indices[ idx + 1 ] = (unsigned short)idxD;
@@ -89,13 +89,13 @@ void CreateTerrainlet( terrainlet_t * terra ) {
 			}
 		}
 
-		const int size = TERRAINLET_SIZE * TERRAINLET_SIZE * 6 * sizeof( unsigned short );
+		const int size = terrainIsland_SIZE * terrainIsland_SIZE * 6 * sizeof( unsigned short );
 		terra->ibo.Generate( GL_ELEMENT_ARRAY_BUFFER, size, terra->indices, GL_STATIC_DRAW );
 	}
 
 	// Create the VBO
 	const int stride = sizeof( terrainVert_t );
-	const int size = TERRAINLET_SIZE * TERRAINLET_SIZE * stride;
+	const int size = terrainIsland_SIZE * terrainIsland_SIZE * stride;
 	terra->vbo.Generate( GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW );
     
 	//
@@ -156,9 +156,9 @@ terrainNode_t::terrainNode_t( Bounds * boundsData, int tileX_, int tileY_, int x
 	extern int GetIslandID( int depth, int x, int y );
 	int idx = GetIslandID( depth_, x, y );
 
-	extern int GetTerrainletsPerTile();
-	int maxTerrainlets = GetTerrainletsPerTile();
-	assert( idx < maxTerrainlets );
+	extern int GetTerrainIslandsPerTile();
+	int maxterrainIslands = GetTerrainIslandsPerTile();
+	assert( idx < maxterrainIslands );
 
 	bounds = boundsData[ idx ];
 	terraID = -1;
