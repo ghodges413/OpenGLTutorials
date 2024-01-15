@@ -1,0 +1,83 @@
+/*
+ ==============================================================
+ IrradianceN.comp
+ 
+ Iteratively builds the change in Ground Irradiance Table - based on Bruneton2008 equation 15.
+ This is actually quite very clear in Bruneton but confusing in Schafhitzel.  Schafhitzel hardly
+ mentions the ground irradiance or its calculation.
+ ==============================================================
+ */
+#include "common.comp"
+
+layout ( local_size_x = 16, local_size_y = 16, local_size_z = 4 ) in;
+
+uniform writeonly image2D destTex;
+uniform vec2 dimensions;
+
+uniform sampler3D deltaScatterSampler;
+uniform int iteration;
+
+uniform int numSamples;
+
+/*
+ ===============================
+ main
+ ===============================
+ */
+void main() {
+	ivec2 storePos = ivec2( gl_GlobalInvocationID.xy );
+	vec2 st = ( gl_GlobalInvocationID.xy + vec2( 0.5 ) ) / dimensions.xy;
+	
+	// Convert from the texture's st to the physical height and sun direction
+	float radius;
+	float cosAngleSun;
+    ConvertIrradianceCoordToPhysicalHeightAngle( st, radius, cosAngleSun );
+	
+	// Calculate the ray to the sun
+	float sinAngleSun = sqrt( 1.0 - cosAngleSun * cosAngleSun );
+    vec3 sunRay = vec3( sinAngleSun, 0.0, cosAngleSun );
+
+	const float pi = acos( -1.0 );
+	float deltaTheta = 0.5 * pi / float( numSamples );		// zenith angle (only integrate over half the sphere.. we only need the upper half for calculating ground irradiance)
+	float deltaPhi = 2.0 * pi / float( numSamples );		// azimuth angle
+	
+	//
+	// Integrate over the entire view sphere for this height and solar angle ( equation 15 in Bruneton2008 )
+	//
+	vec3 irradiance = vec3( 0.0 );
+    for ( int i = 0; i <= numSamples; ++i ) {
+		// Current azimuth angle for the view
+		float phi = float( i ) * deltaPhi;
+		
+        for ( int j = 0; j <= numSamples; ++j ) {
+			// Current zenith angle for the view
+			float theta = float( j ) * deltaTheta;
+			
+			// The solid angle for this part of the integral
+            float dOmega = deltaTheta * deltaPhi * sin( theta );
+
+			// Calculate the view ray direction
+            vec3 raySample = vec3( cos( phi ) * sin( theta ), sin( phi ) * sin( theta ), cos( theta ) );
+			
+			// Calculate the angle between the ray to the sun and view direction ray
+            float cosAngleViewSun = dot( sunRay, raySample );
+
+			// Lookup the change in the scattering
+			vec4 scatter = texture4D( deltaScatterSampler, radius, raySample.z, cosAngleSun, cosAngleViewSun ).rgba;
+			
+			// first iteration is special because Rayleigh and Mie were stored separately,
+			// without the phase functions factors; they must be reintroduced here
+            if ( 0 == iteration ) {
+				vec3 scatterRay = scatter.rgb * ScatterPhaseFunctionRayleigh( cosAngleViewSun );
+				vec3 scatterMie = vec3( scatter.a ) * ScatterPhaseFunctionMie( cosAngleViewSun );
+
+                scatter.rgb = scatterRay + scatterMie;
+            }
+			
+			// Sum the integral
+			irradiance += scatter.rgb * raySample.z * dOmega;
+        }
+    }
+
+	imageStore( destTex, storePos.xy, vec4( irradiance, 0.0 ) );
+}
