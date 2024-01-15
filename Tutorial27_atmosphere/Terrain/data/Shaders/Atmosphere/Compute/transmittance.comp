@@ -1,0 +1,82 @@
+/*
+ ==============================================================
+ Transmittance.comp
+ 
+ Builds the Transmittance Table - based on Bruneton2008 equation 5.
+ This is the same equation found in Schafhitzel2007
+ ==============================================================
+ */
+#include "common.comp"
+ 
+uniform writeonly image2D destTex;
+uniform vec2 dimensions;
+
+layout ( local_size_x = 16, local_size_y = 16 ) in;
+
+
+uniform int numSamples;
+
+/*
+ ===============================
+ ExtinctionOverPath
+ ===============================
+ */
+vec3 ExtinctionOverPath( in float scaleHeight, in float radius, in float cosAngle, in vec3 betaExtinction ) {
+	// If we hit the planet, return an opaque value
+	if ( DoesCollideGround( radius, cosAngle, radiusGround ) ) {
+		return vec3( 1e9 );
+	}
+	
+	// Get the distance for this ray
+    float pathLength = IntersectGroundTop( radius, cosAngle );
+	float ds = pathLength / float( numSamples );
+
+	// Calculate the initial sample
+    float prevDensityRatio = exp( -( radius - radiusGround ) / scaleHeight );
+
+	// Integrate over the path for the extinction
+	float result = 0.0;
+    for ( int i = 1; i <= numSamples; ++i ) {
+		// Get the pathlength
+        float s = float( i ) * ds;
+		
+		// Accurately calculate the height at this location
+		float r = GetNewRadius( radius, s, cosAngle );
+		float h = r - radiusGround;
+
+		// Get the density ratio
+        float densityRatio = exp( -h / scaleHeight );
+
+		// Trapezoidal integration
+        result += ( prevDensityRatio + densityRatio ) * 0.5 * ds;
+
+		// Save off the density ratio for trapezoidal integration
+        prevDensityRatio = densityRatio;
+    }
+
+    return result * betaExtinction;
+}
+
+/*
+ ===============================
+ main
+ ===============================
+ */
+void main() {
+	ivec2 storePos = ivec2( gl_GlobalInvocationID.xy );
+	vec2 st = ( gl_GlobalInvocationID.xy + vec2( 0.5 ) ) / dimensions.xy;
+	
+	float radius;
+	float cosAngle;
+	ConvertTransmittanceCoordToPhysicalHeightAngle( st, radius, cosAngle );
+
+	// Calculate the optical depth for rayleigh and mie
+    vec3 extinctionRayleigh = ExtinctionOverPath( scaleHeightRayleigh, radius, cosAngle, betaRayleighExtinction );
+	vec3 extinctionMie = ExtinctionOverPath( scaleHeightMie, radius, cosAngle, betaMieExtinction );
+
+	// Calculate the final extinction
+    vec4 finalExtinction = vec4( exp( -extinctionRayleigh - extinctionMie ), 0.0 );
+	
+	// Store the final extinction into the transmittance table
+	imageStore( destTex, storePos.xy, finalExtinction );
+}

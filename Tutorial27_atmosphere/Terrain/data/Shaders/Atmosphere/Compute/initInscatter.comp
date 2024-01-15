@@ -1,0 +1,107 @@
+/*
+ ==============================================================
+ InitInscatter.comp
+ 
+ Builds the initial Scattering Table - based on Bruneton2008 equations 9 and 11.
+ This is the same equation found in Schafhitzel2007 (actually, it's the very heart of Sch07)
+ ==============================================================
+ */
+#include "common.comp"
+
+uniform writeonly image3D destTex;
+uniform sampler2D transmittanceSampler;
+
+uniform int numSamples;
+
+layout ( local_size_x = 16, local_size_y = 16, local_size_z = 4 ) in;
+
+
+/*
+ ===============================
+ ScatterAtPointFromSunIntoView
+ ===============================
+ */
+vec3 ScatterAtPointFromSunIntoView( in float radius, in float cosAngleView, in float radiusPoint, in float cosAngleSunPoint, in float s, in float scaleHeight ) {
+	// Don't go below the ground height
+    radiusPoint = max( radiusGround, radiusPoint );
+	
+	// If we hit the planet, return a value with no light
+	if ( DoesCollideGround( radiusPoint, cosAngleSunPoint, radiusGround ) ) {
+		return vec3( 0.0 );
+	}
+	
+	// Get the extinction for the view and for the sun
+	vec3 extinctionView = Transmittance( radius, cosAngleView, s, transmittanceSampler );
+	vec3 extinctionSun = Transmittance( radiusPoint, cosAngleSunPoint, transmittanceSampler );
+
+	// Multiply the extinction from the camera to this point and the extinction from this point to the sun
+	vec3 totalExtinction = extinctionView * extinctionSun;
+	
+	// Calculate the scattering
+	float heightPoint = radiusPoint - radiusGround;
+	vec3 scatter = exp( -heightPoint / scaleHeight ) * totalExtinction;
+	return scatter;
+}
+
+/*
+ ===============================
+ CalcluateScattering
+ ===============================
+ */
+vec3 CalcluateScattering( in float radius, in float cosAngleView, in float cosAngleSun, in float cosAngleViewSun, in vec3 betaScatter, in float scaleHeight ) {
+	// Get the total path length and the delta path length
+    float pathLength = IntersectGroundTop( radius, cosAngleView );
+	float ds = pathLength / float( numSamples );
+	
+	// Integrate over the path
+	vec3 scatter = vec3( 0.0 );
+	vec3 prevScatter = vec3( 0.0 );
+    for ( int i = 0; i <= numSamples; ++i ) {
+		// Get the path length to this sample
+        float s = float( i ) * ds;
+		
+		// Accurately calculate the height at this location
+		float radiusScatterPoint = GetNewRadius( radius, s, cosAngleView );
+		
+		// Calculate the angle with the sun from this scatter point
+		float cosAngleSunScatterPoint = GetNextAngleSun( radius, s, radiusScatterPoint, cosAngleView, cosAngleSun, cosAngleViewSun );
+		
+		// Get the scattering over the path for this height and solar angle
+        vec3 samplePointScatter = ScatterAtPointFromSunIntoView( radius, cosAngleView, radiusScatterPoint, cosAngleSunScatterPoint, s, scaleHeight );
+		
+		// Trapezoidal integration
+        scatter += ( prevScatter + samplePointScatter ) * 0.5 * ds;
+		
+		// Store this iteration to the previous for trapezoidal integration
+        prevScatter = samplePointScatter;
+    }
+	
+	// Finalize the scattering
+    scatter *= betaScatter;
+	return scatter;
+}
+
+/*
+ ===============================
+ main
+ ===============================
+ */
+void main() {
+	vec3 fragCoord = vec3( gl_GlobalInvocationID.xyz );
+	
+	float radius = GetRadius( fragCoord );
+    vec3 angles = GetPhysicalAnglesFromTextureCoords( radius, fragCoord.xy );
+	
+    vec3 scatterRayleigh = CalcluateScattering( radius, angles.x, angles.y, angles.z, betaRayleighScatter, scaleHeightRayleigh );
+	vec3 scatterMie = CalcluateScattering( radius, angles.x, angles.y, angles.z, betaMieScatter, scaleHeightMie );
+	
+	// This is simple single scattering.  Likewise from Schafhitzel 2007, we are to defer the phase function to later.
+	// However, later... when we calculate the multi-scattering, we will be forced to re-introduce the phase function
+	// then for proper integration on the first iteration.  This must be why Bruneton 2008 used a 4D texture to
+	// store the scattering information... multiple scattering requires it.
+	vec4 finalScatter = vec4( scatterRayleigh.rgb, scatterMie.r );
+	
+	// Store off the scattering
+	ivec3 storePos = ivec3( gl_GlobalInvocationID.xyz );
+	imageStore( destTex, storePos, finalScatter );
+}

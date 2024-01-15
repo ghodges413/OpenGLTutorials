@@ -1,0 +1,43 @@
+/*
+ ==============================================================
+ AddDeltaInscatterN.comp
+ 
+ Appends the change in the inscatter to the main ground inscatter table.
+ It is step number 11 from Bruneton2008 Algorithm 4.1
+ ==============================================================
+ */
+#include "common.comp"
+
+layout ( local_size_x = 16, local_size_y = 16, local_size_z = 4 ) in;
+
+layout ( rgba32f ) uniform image3D destTex;
+
+uniform sampler3D deltaScatterSampler;
+uniform vec3 dimensions;
+
+/*
+ ===============================
+ main
+ ===============================
+ */
+void main() {
+	// Get the current inscatter
+	ivec3 coord = ivec3( gl_GlobalInvocationID.xyz );
+	vec4 inscatter = imageLoad( destTex, coord );
+	
+	// Caclulate the scatter phase for this angle
+	vec3 fragCoord = vec3( gl_GlobalInvocationID.xyz );
+	float nu = GetNu( fragCoord.xy );
+	float scatterPhase = ScatterPhaseFunctionRayleigh( nu );
+	
+	// Get the change in scattering
+	vec3 str = ( gl_GlobalInvocationID.xyz + vec3( 0.5 ) ) / dimensions.xyz;
+	vec4 data = texture( deltaScatterSampler, str );
+	data /= scatterPhase;
+	
+	// Add the new scatter to the total
+	inscatter += data;
+	
+	// Store off the scattering
+	imageStore( destTex, coord, inscatter );
+}
