@@ -1,0 +1,40 @@
+/*
+ ==============================================================
+ GroundIrradiance1.comp
+ 
+ Builds the start of the Ground Irradiance Table - based on Bruneton2008 equations 9 and 15.
+ This is similar to what can be found in Schafhitzel2007
+ ==============================================================
+ */
+#include "common.comp"
+
+uniform writeonly image2D destTex;
+
+uniform sampler2D transmittanceSampler;
+uniform vec2 dimensions;
+
+layout ( local_size_x = 16, local_size_y = 16 ) in;
+
+/*
+ ===============================
+ main
+ ===============================
+ */
+void main() {
+	ivec2 storePos = ivec2( gl_GlobalInvocationID.xy );
+	vec2 st = ( gl_GlobalInvocationID.xy + vec2( 0.5 ) ) / dimensions.xy;
+	
+	// Convert from the texture's st to the physical height and sun direction
+	float radius;
+	float cosAngle;
+    ConvertIrradianceCoordToPhysicalHeightAngle( st, radius, cosAngle );
+	
+	// Lookup the transmittance for this height and solar direction
+	vec3 transmittance = Transmittance( radius, cosAngle, transmittanceSampler );
+
+	// Perform a dot product with the normal of the spherical ground
+	vec3 finalColor = transmittance * max( cosAngle, 0.0 );
+
+	// Store the final color
+    imageStore( destTex, storePos.xy, vec4( finalColor, 0.0 ) );
+}

@@ -1,0 +1,100 @@
+#version 450
+
+// gimage* requires binding via glBindImageTexture
+// sampler* requires binding via glBindTexture
+
+// ImageStore/Load only works for pure textures.  It does not work for textures attached to an FBO.
+// Textures that are attached to an FBO must be passed in as a sampler instead of as an image.
+
+layout( binding = 0, rg32f ) uniform readonly image2D sourceTex;
+layout ( binding = 1 ) uniform writeonly image2D destTex;
+
+uniform int patch_dim;
+uniform float patch_length;
+uniform float gravity;
+uniform float time;
+
+#define WORK_GROUP_SIZE 32
+layout ( local_size_x = WORK_GROUP_SIZE, local_size_y = WORK_GROUP_SIZE, local_size_z = 1 ) in;
+
+#define PI 3.141592653589793
+
+/*
+==========================
+ComplexMultiply
+==========================
+*/
+vec2 ComplexMultiply( in vec2 a, in vec2 b ) {
+	vec2 c;
+	c.x = a.x * b.x - a.y * b.y;
+	c.y = a.x * b.y + a.y * b.x;
+	return c;
+}
+
+/*
+==========================
+Complex
+==========================
+*/
+vec2 Complex( in float angle ) {
+	vec2 c;
+	c.x = cos( angle );
+    c.y = sin( angle );
+	return c;
+}
+
+/*
+ ==========================
+ main
+ ==========================
+ */
+void main() {
+	ivec2 st = ivec2( gl_GlobalInvocationID.xy );
+	vec2 H0 = imageLoad( sourceTex, st ).xy;
+	
+	int halfDim = patch_dim / 2;
+	
+	vec2 H0Inv;
+	H0Inv.x = H0.x;
+	H0Inv.y = -H0.y;
+	
+	//
+	// Calculate the angle to rotate by
+	//
+	vec2 k = vec2( st.x - halfDim, st.y - halfDim ) / patch_length;
+	float omega = sqrt( PI * length( k ) * gravity );
+	float angle = omega * time;
+	vec2 rot = Complex( angle );
+	
+	vec2 rotInv;
+	rotInv.x = rot.x;
+	rotInv.y = -rot.y;
+	
+	// Move through time!
+	vec2 Ht = ComplexMultiply( H0, rot );// + ComplexMultiply( H0Inv, rotInv );
+	
+	//
+	// The gradient textures
+	//
+	//vec2 k = vec2( st.x - halfDim, st.y - halfDim );
+	vec2 HtKx = ComplexMultiply( Ht, vec2( 0.0, k.x ) );
+	vec2 HtKy = ComplexMultiply( Ht, vec2( 0.0, k.y ) );
+	
+	//
+	// The displacement textures
+	//
+	if ( length( k ) > 0.000001f ) {
+		k = normalize( k );
+	}
+	vec2 HtKxNormalized = ComplexMultiply( Ht, vec2( 0.0, -k.x ) );
+	vec2 HtKyNormalized = ComplexMultiply( Ht, vec2( 0.0, -k.y ) );
+	
+	//
+	// Store the transformed data
+	//
+	imageStore( destTex, st + ivec2( 0, 0 * patch_dim ), vec4( Ht.x, Ht.y, 0.0, 1.0f ) );
+	imageStore( destTex, st + ivec2( 0, 1 * patch_dim ), vec4( HtKxNormalized.x, HtKxNormalized.y, 0.0, 1.0f ) );
+	imageStore( destTex, st + ivec2( 0, 2 * patch_dim ), vec4( HtKyNormalized.x, HtKyNormalized.y, 0.0, 1.0f ) );
+}
+ 
+ 

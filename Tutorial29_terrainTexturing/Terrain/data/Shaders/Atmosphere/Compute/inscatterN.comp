@@ -1,0 +1,92 @@
+/*
+ ==============================================================
+ InscatterN.comp
+ 
+ Iteratively builds the change in the Inscatter Table - based on Bruneton2008 equation 11.
+ ==============================================================
+ */
+#include "common.comp"
+
+layout ( local_size_x = 16, local_size_y = 16, local_size_z = 4 ) in;
+
+uniform writeonly image3D destTex;
+
+uniform int numSamples;
+
+uniform sampler2D transmittanceSampler;
+uniform sampler3D deltaLightScatterSampler;
+
+/*
+ ===============================
+ CalculateScatterAtPoint
+ ===============================
+ */
+vec3 CalculateScatterAtPoint( in float radius, in float cosAngleView, in float cosAngleSun, in float cosAngleSunView, in float s ) {
+	// Get the next position
+	float radiusScatterPoint = GetNewRadius( radius, s, cosAngleView );
+	
+	// Get the view angle at the next position
+	float cosAngleViewScatterPoint = GetNextAngleView( radius, s, radiusScatterPoint, cosAngleView );
+	
+	// Get the sun angle at the next position
+	float cosAngleSunScatterPoint = GetNextAngleSun( radius, s, radiusScatterPoint, cosAngleView, cosAngleSun, cosAngleSunView );
+	
+	// Lookup the change in the light scattering
+	vec3 deltaLightScatter = texture4D( deltaLightScatterSampler, radiusScatterPoint, cosAngleViewScatterPoint, cosAngleSunScatterPoint, cosAngleSunView ).rgb;
+	
+	// Look up the extinction between these two points
+	vec3 transmission = Transmittance( radius, cosAngleView, s, transmittanceSampler );
+	
+	// Return the amount of light scattered into the position
+    return transmission * deltaLightScatter;
+}
+
+/*
+ ===============================
+ CalculateInscatter
+ ===============================
+ */
+vec3 CalculateInscatter( in float radius, in float cosAngleView, in float cosAngleSun, in float cosAngleSunView ) {
+	// Get the total path length and the delta path length
+	float pathLength = IntersectGroundTop( radius, cosAngleView );
+    float ds = pathLength / float( numSamples );
+	
+	// Get the initial scatering for trapezoidal integration
+    vec3 prevScatter = CalculateScatterAtPoint( radius, cosAngleView, cosAngleSun, cosAngleSunView, 0.0 );
+	
+	// Integrate over the path to find all the new light scattering into this position
+	vec3 scatter = vec3( 0.0 );
+    for ( int i = 1; i <= numSamples; ++i ) {
+		// Get the path length for this sample
+        float s = float( i ) * ds;
+		
+		// Get the change in the inscattering at this point
+        vec3 samplePointScatter = CalculateScatterAtPoint( radius, cosAngleView, cosAngleSun, cosAngleSunView, s );
+		
+		// Trapezoidal integration
+        scatter += ( prevScatter + samplePointScatter ) * 0.5 * ds;
+
+		// Store off this sample for trapezoidal integration
+        prevScatter = samplePointScatter;
+    }
+    return scatter;
+}
+
+/*
+ ===============================
+ main
+ ===============================
+ */
+void main() {
+	vec3 fragCoord = vec3( gl_GlobalInvocationID.xyz );
+	
+	float radius = GetRadius( fragCoord );
+    vec3 angles = GetPhysicalAnglesFromTextureCoords( radius, fragCoord.xy );
+	
+    vec3 inscatter = CalculateInscatter( radius, angles.x, angles.y, angles.z );
+	vec4 finalScatter = vec4( inscatter, 0.0 );
+	
+	// Store off the scattering
+	ivec3 storePos = ivec3( gl_GlobalInvocationID.xyz );
+	imageStore( destTex, storePos, finalScatter );
+}

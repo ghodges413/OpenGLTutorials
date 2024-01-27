@@ -1,0 +1,104 @@
+ 
+#define PI 3.141592653589793
+#define INV_ROOT2 0.70710678118654752440084436210485
+
+/*
+==========================
+Complex
+==========================
+*/
+vec2 Complex( in float angle ) {
+	vec2 c;
+	c.x = cos( angle );
+    c.y = sin( angle );
+	return c;
+}
+
+/*
+==========================
+ComplexMultiply
+==========================
+*/
+vec2 ComplexMultiply( in vec2 a, in vec2 b ) {
+	vec2 c;
+	c.x = a.x * b.x - a.y * b.y;
+	c.y = a.x * b.y + a.y * b.x;
+	return c;
+}
+
+/*
+ ==========================
+ FFT2
+ ==========================
+ */
+void FFT2( inout vec2 a, inout vec2 b ) {
+	vec2 tmp = a;
+	
+	a = a + b;
+	b = tmp - b;
+}
+
+/*
+ ==========================
+ FFT4
+ ==========================
+ */
+void FFT4( inout vec2 data[ 4 ] ) {
+	vec2 d0 = data[ 0 ];
+	vec2 d1 = data[ 1 ];
+	vec2 d2 = data[ 2 ];
+	vec2 d3 = data[ 3 ];
+	
+	vec2 jd1 = vec2( -d1.y, d1.x );
+	vec2 jd3 = vec2( -d3.y, d3.x );
+	
+	data[ 0 ] = ( d0 +  d1 + d2 +  d3 );
+	data[ 2 ] = ( d0 - jd1 - d2 + jd3 );
+	data[ 1 ] = ( d0 -  d1 + d2 -  d3 );
+	data[ 3 ] = ( d0 + jd1 - d2 - jd3 );
+}
+
+/*
+ ==========================
+ FFT8
+ ==========================
+ */
+void FFT8( inout vec2 data[ 8 ] ) {
+	vec2 d0 = data[ 0 ];
+	vec2 d1 = data[ 1 ];
+	vec2 d2 = data[ 2 ];
+	vec2 d3 = data[ 3 ];
+	vec2 d4 = data[ 4 ];
+	vec2 d5 = data[ 5 ];
+	vec2 d6 = data[ 6 ];
+	vec2 d7 = data[ 7 ];
+	
+	vec2 jd1 = vec2( -d1.y, d1.x );
+	vec2 wd1 = ComplexMultiply( vec2( INV_ROOT2, INV_ROOT2 ), d1 );
+	vec2 md1 = ComplexMultiply( vec2( INV_ROOT2, -INV_ROOT2 ), d1 );
+	
+	vec2 jd2 = vec2( -d2.y, d2.x );
+	
+	vec2 jd3 = vec2( -d3.y, d3.x );
+	vec2 wd3 = ComplexMultiply( vec2( INV_ROOT2, INV_ROOT2 ), d3 );
+	vec2 md3 = ComplexMultiply( vec2( INV_ROOT2, -INV_ROOT2 ), d3 );
+	
+	vec2 jd5 = vec2( -d5.y, d5.x );
+	vec2 wd5 = ComplexMultiply( vec2( INV_ROOT2, INV_ROOT2 ), d5 );
+	vec2 md5 = ComplexMultiply( vec2( INV_ROOT2, -INV_ROOT2 ), d5 );
+	
+	vec2 jd6 = vec2( -d6.y, d6.x );
+	
+	vec2 jd7 = vec2( -d7.y, d7.x );
+	vec2 wd7 = ComplexMultiply( vec2( INV_ROOT2, INV_ROOT2 ), d7 );
+	vec2 md7 = ComplexMultiply( vec2( INV_ROOT2, -INV_ROOT2 ), d7 );
+
+	data[ 0 ] = d0 +  d1 +  d2 +  d3 + d4 +  d5 +  d6 +  d7;
+	data[ 1 ] = d0 + md1 - jd2 - wd3 - d4 - md5 + jd6 + wd7;
+	data[ 2 ] = d0 - jd1 -  d2 + jd3 + d4 - jd5 -  d6 + jd7;
+	data[ 3 ] = d0 - wd1 + jd2 + md3 - d4 + wd5 - jd6 - md7;
+	data[ 4 ] = d0 -  d1 +  d2 -  d3 + d4 -  d5 +  d6 -  d7;
+	data[ 5 ] = d0 - md1 - jd2 + wd3 - d4 + md5 + jd6 - wd7;
+	data[ 6 ] = d0 + jd1 -  d2 - jd3 + d4 + jd5 -  d6 - jd7;
+	data[ 7 ] = d0 + wd1 + jd2 - md3 - d4 - wd5 - jd6 + md7;
+}
