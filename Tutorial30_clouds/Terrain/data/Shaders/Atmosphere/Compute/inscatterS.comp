@@ -1,0 +1,189 @@
+/*
+ ==============================================================
+ InscatterS.comp
+ 
+ Iteratively builds the change in Light Scattering Table - based on Bruneton2008 equation 7.
+ We now fully depart from Schafhitzel2007 and begin our adventure into multi-scattering.
+ This was a bitch to get right.
+ ==============================================================
+ */
+#include "common.comp"
+
+layout ( local_size_x = 16, local_size_y = 16, local_size_z = 4 ) in;
+
+uniform writeonly image3D destTex;
+
+uniform sampler2D transmittanceSampler;
+uniform sampler2D deltaGroundIrradianceSampler;
+uniform sampler3D deltaScatterSampler;
+uniform int iteration;
+
+uniform int numSamples;
+uniform float averageGroundReflectence;
+
+/*
+ ===============================
+ CalculateInscatter
+ ===============================
+ */
+vec3 CalculateInscatter( in float radius, in float cosAngleView, in float cosAngleSun, in float cosAngleViewSun ) {
+	// Ensure that our values are not out of range
+    radius = clamp( radius, radiusGround, radiusTop );
+    cosAngleView = clamp( cosAngleView, -1.0, 1.0 );
+    cosAngleSun = clamp( cosAngleSun, -1.0, 1.0 );
+	
+	//
+	// Clamp the angle between the view and the sun
+	//
+	{
+		float sinAngleView = sqrt( 1.0 - cosAngleView * cosAngleView );
+		float sinAngleSun = sqrt( 1.0 - cosAngleSun * cosAngleSun );
+		
+		// The angle between the sun and view need to range between the min and max angles away from
+		// the view vector that the sun can possible be.  The min and max sun vectors will be co-planar with
+		// the view vector.
+		vec3 view = vec3( sinAngleView, 0.0, cosAngleView );
+		vec3 sun0 = vec3( sinAngleSun, 0.0, cosAngleSun );
+		vec3 sun1 = vec3( -sinAngleSun, 0.0, cosAngleSun );
+		
+		// TODO: make sure these are the right limits (ie that sun0 really is the min and sun1 really is the max)
+		float min = dot( view, sun0 );
+		float max = dot( view, sun1 );
+		
+		// This probably isn't necessary
+		if ( max < min ) {
+			float tmp = min;
+			min = max;
+			max = tmp;
+		}
+		
+		// Clamp the angle between the view and sun
+		cosAngleViewSun = clamp( cosAngleViewSun, min, max );
+	}
+
+	//
+	//	Build the rays of the View and to the Sun
+	//
+	vec3 rayView;
+	vec3 raySun;
+	GetViewAndSunRaysFromAngles( cosAngleView, cosAngleSun, cosAngleViewSun, rayView, raySun );
+
+	const float pi = acos( -1.0 );
+	float deltaTheta = pi / float( numSamples );	// zenith angle
+	float deltatPhi = 2.0 * pi / float( numSamples );		// azimuth angle
+
+    //
+	//	Integrate over the sphere
+	//
+	vec3 scatter = vec3( 0.0 );
+    for ( int i = 0; i <= numSamples; ++i ) {
+		// Current zenith angle for the sample
+		float theta = float( i ) * deltaTheta;
+        float cosTheta = cos( theta );
+		float sinTheta = sin( theta );
+
+		// Integrate over the azimuth
+        for ( int j = 0; j <= numSamples; ++j ) {
+			// Current azimuth angle for the sample
+			float phi = float( j ) * deltatPhi;
+			
+			// The solid angle for the sample
+            float dOmega = deltaTheta * deltatPhi * sinTheta * 0.25;
+			
+			// The ray pointing at the sample
+            vec3 raySample = vec3( cos( phi ) * sin( theta ), sin( phi ) * sin( theta ), cosTheta );
+
+			//
+			// Calculate the light scattering into the sample from the ground
+			//
+			vec3 groundScatter = vec3( 0.0 );
+			if ( DoesCollideGround( radius, cosTheta, radiusGround ) ) {
+				// Get the distance to the ground
+				float distanceToGround = IntersectGroundTop( radius, cosTheta );
+				
+				// Get the angle from the ground to the view
+				float cosAngle = -GetNextAngleView( radius, distanceToGround, radiusGround, cosTheta );
+				
+				// Calculate the normal vector for the ground here
+				vec3 vectorToPos = vec3( 0.0, 0.0, radius );
+				
+				// Get the vector to the location of the ground that was hit
+				vec3 vectorToGround = vectorToPos + distanceToGround * raySample;
+				
+				// Get the normal of the ground (spherical surface, so just normalize)
+				vec3 groundNormal = normalize( vectorToGround );
+				
+				// Calculate the angle between the ground and the sun
+				float cosAngleGroundSun = dot( groundNormal, raySun );
+				
+				// Get the ground transmittance
+				vec3 groundTransmittance = Transmittance( radiusGround, cosAngle, distanceToGround, transmittanceSampler );
+				
+				// Get the ground irradiance
+				vec3 groundIrradiance = Irradiance( deltaGroundIrradianceSampler, radiusGround, cosAngleGroundSun );
+				
+				// Mulitply the ground irradiance by the extinction from the ground to the view position
+				groundScatter = averageGroundReflectence * groundIrradiance * groundTransmittance / pi;
+			}
+			
+			//
+			//	Calculate the deltaS term
+			//
+			
+			float cosAngleSunSample = dot( raySun, raySample );
+			float cosAngleViewSample = dot( rayView, raySample );
+
+			// Lookup the change in the scattering
+			vec4 deltaScatter = texture4D( deltaScatterSampler, radius, raySample.z, cosAngleSun, cosAngleSunSample ).rgba;
+			
+			// Likewise from Schafhitzel 2007, we calculated the single scattering separately for Mie and Rayleigh and
+			// chose to defer the calculation of the scattering phase function until later.  Well, it's later.  But we only need
+			// to do this once.  Once it is in, it is in.
+			if ( 0 == iteration ) {
+				vec3 deltaScatterRayleigh = deltaScatter.rgb * ScatterPhaseFunctionRayleigh( cosAngleSunSample );
+				vec3 deltaScatterMie = vec3( deltaScatter.a ) * ScatterPhaseFunctionMie( cosAngleSunSample );
+				
+                deltaScatter.rgb = deltaScatterRayleigh + deltaScatterMie;
+            }
+
+			//
+			//	Calculate the final light entering our sample
+			//
+			
+			// Get the height
+			float height = radius - radiusGround;
+			
+			// Get the density ratios
+			float densityRatioRayleigh = exp( -height / scaleHeightRayleigh );
+			float densityRatioMie = exp( -height / scaleHeightMie );
+			
+			// Get the scattering
+			vec3 scatterRayleigh = betaRayleighScatter * densityRatioRayleigh * ScatterPhaseFunctionRayleigh( cosAngleViewSample );
+			vec3 scatterMie = betaMieScatter * densityRatioMie * ScatterPhaseFunctionMie( cosAngleViewSample );
+			
+			// Integrate
+            scatter += ( groundScatter + deltaScatter.rgb ) * ( scatterRayleigh + scatterMie ) * dOmega;
+        }
+    }
+
+	return scatter;
+}
+
+/*
+ ===============================
+ main
+ ===============================
+ */
+void main() {
+	vec3 fragCoord = vec3( gl_GlobalInvocationID.xyz );
+	
+	float radius = GetRadius( fragCoord );
+    vec3 angles = GetPhysicalAnglesFromTextureCoords( radius, fragCoord.xy );
+	
+    vec3 inscatter = CalculateInscatter( radius, angles.x, angles.y, angles.z );
+	vec4 finalScatter = vec4( inscatter, 0.0 );
+	
+	// Store off the scattering
+	ivec3 storePos = ivec3( gl_GlobalInvocationID.xyz );
+	imageStore( destTex, storePos, finalScatter );
+}

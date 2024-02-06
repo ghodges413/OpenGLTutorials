@@ -1,0 +1,343 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="code">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="code\Terrain">
+      <UniqueIdentifier>{3654042b-1d79-41dd-b7ef-48204285f80e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Threading">
+      <UniqueIdentifier>{a85e78b6-ee36-44f4-9ec5-8097291f6b70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\VirtualTexture">
+      <UniqueIdentifier>{4d5f4c62-e805-4f82-9fe3-71f74cc5ea71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Atmosphere">
+      <UniqueIdentifier>{e37e4fbe-b57a-4d97-81a7-74b0e7067ff5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Math">
+      <UniqueIdentifier>{9d3854e9-ed71-49a7-b4ce-d27f557a8731}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Graphics">
+      <UniqueIdentifier>{578766e6-9f00-412e-b800-dda0d470d496}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Miscellaneous">
+      <UniqueIdentifier>{c443f767-6ef5-42d5-acca-59b40483c403}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Water">
+      <UniqueIdentifier>{1ae9a497-9493-44ee-84db-e836f9be0ab6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Clouds">
+      <UniqueIdentifier>{aa6a9c29-b897-4c2a-b797-38509725a8f4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\code\winmain.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\Heightmap.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\Terrain.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\TerrainTile.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\TerrainFile.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\TerrainVert.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\TerrainPool.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Threading\Atomics.cpp">
+      <Filter>code\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Threading\Mutex.cpp">
+      <Filter>code\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Threading\ThreadLocks.cpp">
+      <Filter>code\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Threading\Threads.cpp">
+      <Filter>code\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Terrain\TerrainStreamer.cpp">
+      <Filter>code\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\VirtualTexture\PageTable.cpp">
+      <Filter>code\VirtualTexture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\VirtualTexture\VirtualTexture.cpp">
+      <Filter>code\VirtualTexture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Atmosphere\BrunetonUtils.cpp">
+      <Filter>code\Atmosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Atmosphere\BuildBruneton.cpp">
+      <Filter>code\Atmosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Atmosphere\BuildIrradiance.cpp">
+      <Filter>code\Atmosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Atmosphere\BuildScatter.cpp">
+      <Filter>code\Atmosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Atmosphere\BuildTransmission.cpp">
+      <Filter>code\Atmosphere</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Frustum.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Matrix.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\MatrixOps.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Vector.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Plane.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Graphics.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Mesh.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\RenderSurface.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Shader.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Targa.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Texture.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\VertexArrayObject.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\VertexBufferObject.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\Fileio.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\Time.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Sphere.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\String.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\ShaderManager.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\TextureManager.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Water\Ocean.cpp">
+      <Filter>code\Water</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Fourier.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Math.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Quat.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Random.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Perlin.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Clouds\Clouds.cpp">
+      <Filter>code\Clouds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Clouds\BlueNoise.cpp">
+      <Filter>code\Clouds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Clouds\WorleyNoise.cpp">
+      <Filter>code\Clouds</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\code\Terrain\Heightmap.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\Terrain.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\TerrainTile.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\TerrainFile.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\TerrainVert.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\TerrainPool.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Threading\Atomics.h">
+      <Filter>code\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Threading\Common.h">
+      <Filter>code\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Threading\Mutex.h">
+      <Filter>code\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Threading\ThreadLocks.h">
+      <Filter>code\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Threading\Threads.h">
+      <Filter>code\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Terrain\TerrainStreamer.h">
+      <Filter>code\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\VirtualTexture\Common.h">
+      <Filter>code\VirtualTexture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\VirtualTexture\PageTable.h">
+      <Filter>code\VirtualTexture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\VirtualTexture\VirtualTexture.h">
+      <Filter>code\VirtualTexture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Atmosphere\BrunetonUtils.h">
+      <Filter>code\Atmosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Atmosphere\BuildBruneton.h">
+      <Filter>code\Atmosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Atmosphere\BuildIrradiance.h">
+      <Filter>code\Atmosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Atmosphere\BuildScatter.h">
+      <Filter>code\Atmosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Atmosphere\BuildTransmission.h">
+      <Filter>code\Atmosphere</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Bounds.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Frustum.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Matrix.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\MatrixOps.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Vector.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Plane.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Graphics.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Mesh.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\RenderSurface.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Shader.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Targa.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Texture.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\VertexArrayObject.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\VertexBufferObject.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Array.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Fileio.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Pair.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Time.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Types.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Sphere.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Comparison.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\String.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\ShaderManager.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\TextureManager.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Water\Ocean.h">
+      <Filter>code\Water</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Complex.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Fourier.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Math.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Quat.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Random.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Perlin.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Clouds\Clouds.h">
+      <Filter>code\Clouds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Clouds\BlueNoise.h">
+      <Filter>code\Clouds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Clouds\WorleyNoise.h">
+      <Filter>code\Clouds</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

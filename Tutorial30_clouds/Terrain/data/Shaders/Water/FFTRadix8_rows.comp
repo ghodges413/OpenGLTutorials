@@ -1,0 +1,74 @@
+#version 450
+#include "FFTTwiddles.comp"
+
+#define WORK_GROUP_SIZE 64
+layout ( local_size_x = WORK_GROUP_SIZE, local_size_y = 1, local_size_z = 1 ) in;
+
+layout( binding = 0, rg32f ) uniform readonly image2D sourceTex;
+layout ( binding = 1 ) uniform writeonly image2D destTex;
+
+uniform int NumSamples; // The number of samples that we run the fft over (in the case of the fft water it's 512 or 64)
+uniform int Iteration;	// The number of times the algorithm has run (used to determine the skip index)
+
+/*
+ ==========================
+ main
+ ==========================
+ */
+void main() {
+	int width = NumSamples / 8;
+	int thread_id = int( gl_GlobalInvocationID.x );
+	int KW = 8;
+	int idxSkip = ( 1 << ( Iteration * 3 ) ); // 2^( number of completed stages )
+
+	// We might be running more threads than we have data, don't run the program on phantom data
+	if ( thread_id >= NumSamples * NumSamples / 8 ) {
+		return;
+	}
+	
+	int rowOffset = int( thread_id / width );
+	int groupId = thread_id % ( width );
+	int groupSize = NumSamples / 8;
+	
+	vec2 data[ 8 ];
+
+	int idxIn = groupId;
+	data[ 0 ] = imageLoad( sourceTex, ivec2( ( 0 * groupSize ) + idxIn, rowOffset ) ).xy;
+	data[ 1 ] = imageLoad( sourceTex, ivec2( ( 1 * groupSize ) + idxIn, rowOffset ) ).xy;
+	data[ 2 ] = imageLoad( sourceTex, ivec2( ( 2 * groupSize ) + idxIn, rowOffset ) ).xy;
+	data[ 3 ] = imageLoad( sourceTex, ivec2( ( 3 * groupSize ) + idxIn, rowOffset ) ).xy;
+	data[ 4 ] = imageLoad( sourceTex, ivec2( ( 4 * groupSize ) + idxIn, rowOffset ) ).xy;
+	data[ 5 ] = imageLoad( sourceTex, ivec2( ( 5 * groupSize ) + idxIn, rowOffset ) ).xy;
+	data[ 6 ] = imageLoad( sourceTex, ivec2( ( 6 * groupSize ) + idxIn, rowOffset ) ).xy;
+	data[ 7 ] = imageLoad( sourceTex, ivec2( ( 7 * groupSize ) + idxIn, rowOffset ) ).xy;
+
+	if ( idxSkip != 1 ) {
+		float angle = -2.0 * PI * ( groupId % idxSkip ) / ( idxSkip * KW );
+
+		//data[ 0 ] = ComplexMultiply( data[ 0 ], Complex( 0.0 * angle ) ); // pointless to run this, but keeping it as commentary
+		data[ 1 ] = ComplexMultiply( data[ 1 ], Complex( 1.0 * angle ) );
+		data[ 2 ] = ComplexMultiply( data[ 2 ], Complex( 2.0 * angle ) );
+		data[ 3 ] = ComplexMultiply( data[ 3 ], Complex( 3.0 * angle ) );
+		data[ 4 ] = ComplexMultiply( data[ 4 ], Complex( 4.0 * angle ) );
+		data[ 5 ] = ComplexMultiply( data[ 5 ], Complex( 5.0 * angle ) );
+		data[ 6 ] = ComplexMultiply( data[ 6 ], Complex( 6.0 * angle ) );
+		data[ 7 ] = ComplexMultiply( data[ 7 ], Complex( 7.0 * angle ) );
+	}
+
+	// Maths
+	FFT8( data );
+	
+	int idxOut = ( groupId / idxSkip ) * idxSkip * KW + ( groupId % idxSkip );
+	imageStore( destTex, ivec2( ( 0 * idxSkip ) + idxOut, rowOffset ), vec4( data[ 0 ].x, data[ 0 ].y, 0.0, 1.0 ) );
+	imageStore( destTex, ivec2( ( 1 * idxSkip ) + idxOut, rowOffset ), vec4( data[ 1 ].x, data[ 1 ].y, 0.0, 1.0 ) );
+	imageStore( destTex, ivec2( ( 2 * idxSkip ) + idxOut, rowOffset ), vec4( data[ 2 ].x, data[ 2 ].y, 0.0, 1.0 ) );
+	imageStore( destTex, ivec2( ( 3 * idxSkip ) + idxOut, rowOffset ), vec4( data[ 3 ].x, data[ 3 ].y, 0.0, 1.0 ) );
+	imageStore( destTex, ivec2( ( 4 * idxSkip ) + idxOut, rowOffset ), vec4( data[ 4 ].x, data[ 4 ].y, 0.0, 1.0 ) );
+	imageStore( destTex, ivec2( ( 5 * idxSkip ) + idxOut, rowOffset ), vec4( data[ 5 ].x, data[ 5 ].y, 0.0, 1.0 ) );
+	imageStore( destTex, ivec2( ( 6 * idxSkip ) + idxOut, rowOffset ), vec4( data[ 6 ].x, data[ 6 ].y, 0.0, 1.0 ) );
+	imageStore( destTex, ivec2( ( 7 * idxSkip ) + idxOut, rowOffset ), vec4( data[ 7 ].x, data[ 7 ].y, 0.0, 1.0 ) );
+}
+
+
+ 
+ 
