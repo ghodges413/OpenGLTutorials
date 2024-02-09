@@ -1,0 +1,201 @@
+#version 450
+
+/*
+==========================
+This Worely noise generator has been adopted from Simon Dev's youtube channel
+==========================
+*/
+
+#define WORK_GROUP_SIZE 8
+layout ( local_size_x = WORK_GROUP_SIZE, local_size_y = WORK_GROUP_SIZE, local_size_z = WORK_GROUP_SIZE ) in;
+
+layout ( binding = 0 ) uniform writeonly image3D destTex;
+
+/*
+==========================
+Remap
+// From GPU Pro7 article on Horizon Zero Dawn clouds
+// Remaps a value in the [a0,b0] range to the [a1,b1] range
+==========================
+*/
+float Remap( float val, float a0, float b0, float a1, float b1 ) {
+	float t = ( val - a0 ) / ( b0 - a0 );
+	float v = a1 * ( 1.0 - t ) + b1 * t;
+	return v;
+}
+
+/*
+==========================
+Hash3
+==========================
+*/
+vec3 Hash3( vec3 p ) {
+	vec3 p2;
+	p2.x = dot( p, vec3( 127.1, 311.7, 74.7 ) );
+	p2.y = dot( p, vec3( 269.5, 183.3, 246.1 ) );
+	p2.z = dot( p, vec3( 113.5, 271.9, 124.6 ) );
+
+	return -1.0 + 2.0 * fract( sin( p2 ) * 43758.5453123 );
+}
+
+/*
+==========================
+Hash3_New
+==========================
+*/
+vec3 Hash3_New( vec3 p, float tileLength ) {
+	return Hash3( mod( p, vec3( tileLength ) ) );
+}
+
+/*
+==========================
+VoronoiCells
+==========================
+*/
+float VoronoiCells( float maxOffset, float cellsMult, float seed ) {
+	vec3 seedhash = Hash3( vec3( seed, seed * seed * 3.14159, seed * 1.17421 ) );
+
+	vec2 uv = vec2( gl_GlobalInvocationID.xy ) / ( 32.0f - 1.0f );
+	float z = float( gl_GlobalInvocationID.z ) / 4.0f;
+	vec3 coords = vec3( uv.xy * cellsMult, z );
+
+	vec3 gridPos = floor( coords );
+	vec3 gridOffset = fract( coords );
+	float maxCell = ceil( maxOffset ) + 1.0;
+
+	float closest = 1.0;
+	for ( float y = -maxCell; y <= maxCell; y += 1.0 ) {
+		for ( float x = -maxCell; x <= maxCell; x += 1.0 ) {
+			for ( float z = -maxCell; z <= maxCell; z += 1.0 ) {
+				vec3 neighborCell = vec3( x, y, z );
+				vec3 cellPos = gridPos + neighborCell;
+				cellPos.xy = mod( cellPos.xy, vec2( cellsMult ) );
+
+				vec3 cellOffset = Hash3( cellPos + seedhash );
+				cellOffset *= maxOffset;
+
+				float distToNeighbor = length( neighborCell + cellOffset - gridOffset );
+				closest = min( closest, distToNeighbor );
+			}
+		}
+	}
+
+	return clamp( closest, 0.0, 1.0 );
+}
+
+/*
+==========================
+GradientNoise
+==========================
+*/
+float GradientNoise( vec3 p, float tileLength ) {
+	vec3 ip = floor( p );
+	vec3 fp = fract( p );
+	vec3 u = smoothstep( vec3( 0 ), vec3( 1 ), fp );
+
+	float a = dot( Hash3_New( ip + vec3( 0, 0, 0 ), tileLength ), fp - vec3( 0, 0, 0 ) );
+	float b = dot( Hash3_New( ip + vec3( 1, 0, 0 ), tileLength ), fp - vec3( 1, 0, 0 ) );
+	float c = dot( Hash3_New( ip + vec3( 0, 1, 0 ), tileLength ), fp - vec3( 0, 1, 0 ) );
+	float d = dot( Hash3_New( ip + vec3( 1, 1, 0 ), tileLength ), fp - vec3( 1, 1, 0 ) );
+
+	float e = dot( Hash3_New( ip + vec3( 0, 0, 1 ), tileLength ), fp - vec3( 0, 0, 1 ) );
+	float f = dot( Hash3_New( ip + vec3( 1, 0, 1 ), tileLength ), fp - vec3( 1, 0, 1 ) );
+	float g = dot( Hash3_New( ip + vec3( 0, 1, 1 ), tileLength ), fp - vec3( 0, 1, 1 ) );
+	float h = dot( Hash3_New( ip + vec3( 1, 1, 1 ), tileLength ), fp - vec3( 1, 1, 1 ) );
+
+	float ab = mix( a, b, u.x );
+	float cd = mix( c, d, u.x );
+	float abcd = mix( ab, cd, u.y );
+
+	float ef = mix( e, f, u.x );
+	float gh = mix( g, h, u.x );
+	float efgh = mix( ef, gh, u.y );
+
+	return mix( abcd, efgh, u.z );
+}
+
+/*
+==========================
+TileableFBM
+==========================
+*/
+float TileableFBM( vec3 p, float tileLength ) {
+	float persistence = 0.5;
+	float lacunarity = 2.0;
+	int octaves = 8;
+
+	float amplitude = 0.5;
+	float total = 0;
+	float normalization = 0;
+
+	for ( int i = 0; i < octaves; i++ ) {
+		float noiseValue = GradientNoise( p, tileLength * lacunarity * 0.5 ) * 0.5 + 0.5;
+		total += noiseValue * amplitude;
+		normalization += amplitude;
+		amplitude *= persistence;
+		p = p * lacunarity;
+	}
+
+	total /= normalization;
+	total = smoothstep( 0.0, 1.0, total );
+
+	return total;
+}
+
+/*
+==========================
+main
+==========================
+*/
+void main() {
+	vec2 uv = vec2( gl_GlobalInvocationID.xy ) / ( 32.0f - 1.0f );
+	float z = float( gl_GlobalInvocationID.z ) / 4.0f;
+
+	const float NumCells = 2;
+	const float multiplier = 1;
+	const float CELL_RANGE = 1;
+
+	//
+	//	Calculate the Perlin Worley noise
+	//
+	vec4 color = vec4( 0 );
+	{
+		float perlinWorley = 0;
+		{
+			float worley0 = 1.0 - VoronoiCells( CELL_RANGE, NumCells * 2.0 * multiplier, 1.0 );
+			float worley1 = 1.0 - VoronoiCells( CELL_RANGE, NumCells * 8.0 * multiplier, 2.0 );
+			float worley2 = 1.0 - VoronoiCells( CELL_RANGE, NumCells * 16.0 * multiplier, 3.0 );
+			float worleyFBM = worley0 * 0.625 + worley1 * 0.25 + worley2 * 0.125;
+
+			float tileLength = 8.0;
+			float fbm0 = TileableFBM( vec3( uv * tileLength, z ) * multiplier, tileLength );
+
+			perlinWorley = Remap( fbm0, 0.0, 1.0, worleyFBM, 1.0 );
+		}
+
+		float worley0 = 1.0 - VoronoiCells( CELL_RANGE, NumCells * 1.0 * multiplier, 4.0 );
+		float worley1 = 1.0 - VoronoiCells( CELL_RANGE, NumCells * 2.0 * multiplier, 5.0 );
+		float worley2 = 1.0 - VoronoiCells( CELL_RANGE, NumCells * 4.0 * multiplier, 6.0 );
+		float worley3 = 1.0 - VoronoiCells( CELL_RANGE, NumCells * 8.0 * multiplier, 7.0 );
+		float worley4 = 1.0 - VoronoiCells( CELL_RANGE, NumCells * 16.0 * multiplier, 8.0 );
+		float worley5 = 1.0 - VoronoiCells( CELL_RANGE, NumCells * 32.0 * multiplier, 9.0 );
+
+		float worleyFBM0 = worley1 * 0.625 + worley2 * 0.25 + worley3 * 0.125;
+		float worleyFBM1 = worley2 * 0.625 + worley3 * 0.25 + worley4 * 0.125;
+		float worleyFBM2 = worley3 * 0.625 + worley4 * 0.25 + worley5 * 0.125;
+
+		float lowFreqFBM = worleyFBM0 * 0.625 + worleyFBM1 * 0.25 + worleyFBM2 * 0.125;
+
+		float tileLength = 8.0;
+		float perlinWorleyDetail = Remap( perlinWorley, lowFreqFBM, 1.0, 0.0, 1.0 );
+
+		color = vec4( perlinWorley, perlinWorleyDetail, 0.0, 0.0 );
+	}
+
+	ivec3 thread_id = ivec3( gl_GlobalInvocationID.xyz );
+	imageStore( destTex, thread_id, color );
+}
+
+
+ 
+ 

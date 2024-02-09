@@ -1,0 +1,47 @@
+#version 450
+
+// gimage* requires binding via glBindImageTexture
+// sampler* requires binding via glBindTexture
+
+// ImageStore/Load only works for pure textures.  It does not work for textures attached to an FBO.
+// Textures that are attached to an FBO must be passed in as a sampler instead of as an image.
+
+layout( binding = 0, rg32f ) uniform readonly image2D sourceTex;
+layout ( binding = 1 ) uniform writeonly image2D destTex;
+
+uniform int patch_dim;
+uniform float patch_length;
+uniform float choppiness;
+
+#define WORK_GROUP_SIZE 32
+layout ( local_size_x = WORK_GROUP_SIZE, local_size_y = WORK_GROUP_SIZE, local_size_z = 1 ) in;
+
+/*
+ ==========================
+ main
+ ==========================
+ */
+void main() {
+	ivec2 st = ivec2( gl_GlobalInvocationID.xy );
+	
+	vec3 data;
+	data.z = imageLoad( sourceTex, st + ivec2( 0, 0 * patch_dim ) ).x;
+	data.x = imageLoad( sourceTex, st + ivec2( 0, 1 * patch_dim ) ).x * choppiness;
+	data.y = imageLoad( sourceTex, st + ivec2( 0, 2 * patch_dim ) ).x * choppiness;
+	
+	// Since the FFT algorithm works over data that exists between [0,N)
+	// But the ocean spectrum data is over [-N/2,N/2).  This creates a
+	// checkerboard pattern in the final data.  This can be resolved
+	// by multiply by exp(ik) for each k... or we can just flip it.
+	if ( ( 1 & st.x ) == 0 && ( 1 & st.y ) == 0 ) {
+		data = -data;
+	}
+	if ( ( 1 & st.x ) == 1 && ( 1 & st.y ) == 1 ) {
+		data = -data;
+	}
+	data /= patch_length;
+	
+	imageStore( destTex, st, vec4( data.x, data.y, data.z, 1.0f ) );
+}
+ 
+ 
