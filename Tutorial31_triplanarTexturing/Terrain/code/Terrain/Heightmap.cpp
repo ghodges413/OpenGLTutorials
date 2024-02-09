@@ -5,6 +5,8 @@
 #include "Terrain/Terrain.h"
 #include "Terrain/TerrainFile.h"
 #include "Graphics/Mesh.h"
+#include "Graphics/TextureManager.h"
+#include "Graphics/ShaderManager.h"
 #include <math.h>
 #include <algorithm>
 #include <stdlib.h>
@@ -302,16 +304,49 @@ Vec4d HeightSample( Vec2d coord, float width ) {
 
 /*
 ================================
-CreateTerrainHeightmap
+CreateTerrainHeightmap_GPU
 ================================
 */
-void CreateTerrainHeightmap( int width, int tileX, int tileY ) {
-    Vec4d * heightmap = (Vec4d *)malloc( sizeof( Vec4d ) * width * width );
-    assert( heightmap );
-    if ( NULL == heightmap ) {
-        return;
+void CreateTerrainHeightmap_GPU( int width, int tileX, int tileY, Vec4d * heightmap ) {
+    TextureOpts_t opts;
+	opts.wrapS = WM_CLAMP;
+	opts.wrapR = WM_CLAMP;
+	opts.wrapT = WM_CLAMP;
+	opts.minFilter = FM_NEAREST;
+	opts.magFilter = FM_NEAREST;
+	opts.dimX = width;
+	opts.dimY = width;
+	opts.dimZ = 0;
+	opts.type = TT_TEXTURE_2D;
+	opts.format = FMT_RGBA32F;
+    Texture * heightmapBuffer = g_textureManager->GetTexture( "_heightmapBuffer", opts, NULL );
+
+    // Run the height map generator compute shader
+    {
+        Shader * shader = g_shaderManager->GetAndUseShader( "Terrain/HeightmapGenerator" );
+        glBindImageTexture( 0, heightmapBuffer->GetName(), 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F );
+
+        shader->SetUniform1i( "width", 1, &width );
+        shader->SetUniform1i( "tileX", 1, &tileX );
+        shader->SetUniform1i( "tileY", 1, &tileY );
+
+        int workGroupSize = 16;
+        shader->DispatchCompute( width / workGroupSize + 1, width / workGroupSize + 1, 1 );
+        glFlush();
     }
 
+    // Read the heightmap back to the cpu
+    glBindTexture( GL_TEXTURE_2D, heightmapBuffer->GetName() );
+    glGetTexImage( GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, heightmap );
+    glBindTexture( GL_TEXTURE_2D, 0 );
+}
+
+/*
+================================
+CreateTerrainHeightmap_CPU
+================================
+*/
+void CreateTerrainHeightmap_CPU( int width, int tileX, int tileY, Vec4d * heightmap ) {
     for ( int y = 0; y < width; y++ ) {
         for ( int x = 0; x < width; x++ ) {
             Vec2d coord;
@@ -327,6 +362,28 @@ void CreateTerrainHeightmap( int width, int tileX, int tileY ) {
             printf( "Terra: %i of %i\n", y, width );
         }
     }
+}
+
+#define TERRAIN_GENERATION_GPU
+
+/*
+================================
+CreateTerrainHeightmap
+================================
+*/
+void CreateTerrainHeightmap( int width, int tileX, int tileY ) {
+    Vec4d * heightmap = (Vec4d *)malloc( sizeof( Vec4d ) * width * width );
+    memset( heightmap, 0, sizeof( Vec4d ) * width * width );
+    assert( heightmap );
+    if ( NULL == heightmap ) {
+        return;
+    }
+
+#if defined( TERRAIN_GENERATION_GPU )
+    CreateTerrainHeightmap_GPU( width, tileX, tileY, heightmap );
+#else
+    CreateTerrainHeightmap_CPU( width, tileX, tileY, heightmap );
+#endif
 
     WriteHeightmapFile( heightmap, width, tileX, tileY );
     free( heightmap );
