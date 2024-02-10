@@ -27,6 +27,7 @@
 #include "Graphics/TextureManager.h"
 
 #include "Miscellaneous/Time.h"
+#include "Miscellaneous/Input.h"
 #include "Terrain/Terrain.h"
 #include "VirtualTexture/VirtualTexture.h"
 #include "Atmosphere/BuildBruneton.h"
@@ -36,8 +37,8 @@
 // Global storage of the window size
 // const int g_screenWidth  = 1200;
 // const int g_screenHeight = 720;
-const int g_screenWidth  = 1920;
-const int g_screenHeight = 1080;
+int g_screenWidth  = 1920;
+int g_screenHeight = 1080;
 
 Mesh g_modelScreenSpaceFarPlane;
 Mesh g_modelScreenSpaceNearPlane;
@@ -64,27 +65,13 @@ bool g_noclip = false;
 float g_dtSec = 0;
 float g_timeTime = 0;
 
-int g_prevMouseX = 0;
-int g_prevMouseY = 0;
-
 atmosphereBuildData_t g_atmos;
 float g_sunAngle = 3.14f * 0.25f;
 
-
-Targa g_targa;
-Texture g_texture;
 Texture * g_textureArray = NULL;
 
-/*
- ================================
- DrawFrame
-
- This is the function that is repeatedly called.
- And it is where all the magic happens.
- ================================
- */
 float g_timeMS = 0;
-void DrawFrame( void ) {
+void Update() {
 	// Calculate the timing
 	static int timeLastFrame	= 0;
 	const int time				= GetTimeMicroseconds();
@@ -104,6 +91,145 @@ void DrawFrame( void ) {
 		OceanUpdate( parms );
 	}
 
+	//
+	//	Input Updates
+	//
+	{
+		Vec3d right = g_cameraLook.Cross( Vec3d( 0, 0, 1 ) );
+		right.Normalize();
+
+		Vec3d dir = Vec3d( 0 );
+		if ( g_keyboard.IsKeyDown( 'w' ) || g_keyboard.IsKeyDown( 'W' ) ) {
+			dir += g_cameraLook;
+		}
+		if ( g_keyboard.IsKeyDown( 's' ) || g_keyboard.IsKeyDown( 'S' ) ) {
+			dir -= g_cameraLook;
+		}
+		if ( g_keyboard.IsKeyDown( 'd' ) || g_keyboard.IsKeyDown( 'D' ) ) {
+			dir += right;
+		}
+		if ( g_keyboard.IsKeyDown( 'a' ) || g_keyboard.IsKeyDown( 'A' ) ) {
+			dir -= right;
+		}
+
+		if ( g_keyboard.IsKeyDown( 'e' ) || g_keyboard.IsKeyDown( 'E' ) ) {
+			dir += Vec3d( 0, 0, 100 );
+		}
+		if ( g_keyboard.IsKeyDown( 'q' ) || g_keyboard.IsKeyDown( 'Q' ) ) {
+			dir -= Vec3d( 0, 0, 100 );
+		}
+
+		float deltaSun = 0;
+		if ( g_keyboard.IsKeyDown( 'o' ) || g_keyboard.IsKeyDown( 'O' ) ) {
+			deltaSun += 3;
+		}
+		if ( g_keyboard.IsKeyDown( 'p' ) || g_keyboard.IsKeyDown( 'P' ) ) {
+			deltaSun -= 3;
+		}
+		g_sunAngle += deltaSun * g_dtSec;
+
+		if ( g_keyboard.WasKeyDown( 'n' ) ) {
+			g_noclip = !g_noclip;
+		}
+
+		float speed = 10.0f;
+		if ( g_noclip ) {
+			speed = 1000.0f;
+		}
+		if ( g_keyboard.IsKeyDown( 'r' ) ) {
+			speed *= 10.0f;
+		}
+		g_cameraPos += dir * g_dtSec * speed;
+	}
+
+	//
+	//	Update mouse inputs
+	//
+	{
+		Vec3d ds = g_mouse.GLPosDelta();
+		float dtX = -ds.x;
+		float dtY = -ds.y;
+
+		if ( fabsf( dtX ) > 100 ) {
+			dtX = 0;
+		}
+		if ( fabsf( dtY ) > 100 ) {
+			dtY = 0;
+		}
+
+		g_cameraTheta += dtX * g_dtSec;
+		g_cameraPhi += dtY * g_dtSec;
+	}
+
+	//
+	//	Update camera matrices
+	//
+	{
+		// Update the camera view matrix
+		const float radius = 1000;
+	#if 0
+		const float angle = runTimeSeconds * 0.0613f;
+		g_cameraPos	= Vec3d( radius * cosf( angle ), radius * sinf( angle ), 300 );
+		Vec3d lookat = Vec3d( 0, 0, 50 );
+	#elif 0
+		const float angle = runTimeSeconds * 0.013f;
+		g_cameraPos	= Vec3d( radius * cosf( angle ), radius * sinf( angle ), 400 );
+		g_cameraPos = g_terrain.GetSurfacePos( g_cameraPos ) + Vec3d( 0, 0, 2 );
+		g_cameraUp	= Vec3d( 0, 0, 1 );
+ 		Vec3d lookat = g_cameraPos * 0.95f;
+		lookat = g_cameraPos;
+		lookat.x += -sinf( angle ) * 30.0f;
+		lookat.y += cosf( angle ) * 30.0f;
+ 		lookat = g_terrain.GetSurfacePos( lookat ) + Vec3d( 0, 0, 2 );
+	#else
+		const float pi = acosf( -1.0f );
+		if ( g_cameraPhi > pi * 0.9f ) {
+			g_cameraPhi = pi * 0.9f;
+		}
+		if ( g_cameraPhi < pi * 0.1f ) {
+			g_cameraPhi = pi * 0.1f;
+		}
+
+	#if 0
+		float theta = -g_cameraTheta;
+		float phi = -g_cameraPhi;
+
+		Vec3d spherePos = Vec3d( cosf( theta ) * sinf( phi ), sinf( theta ) * sinf( phi ), cosf( phi ) );
+		g_cameraPos = spherePos * 1000.0f;
+		g_cameraLook = spherePos * -1.0f;
+	#else
+		g_cameraLook = Vec3d( cosf( g_cameraTheta ) * sinf( g_cameraPhi ), sinf( g_cameraTheta ) * sinf( g_cameraPhi ), cosf( g_cameraPhi ) );
+		if ( !g_noclip ) {
+			g_cameraPos = g_terrain.GetSurfacePos( g_cameraPos ) + Vec3d( 0, 0, 2 );
+		}
+	// 	const float upPhi = g_cameraPhi + pi * 0.5f;
+	// 	g_cameraUp = Vec3d( cosf( g_cameraTheta ) * sinf( upPhi ), sinf( g_cameraTheta ) * sinf( upPhi ), cosf( upPhi ) );
+	#endif
+		Vec3d right = g_cameraLook.Cross( Vec3d( 0, 0, 1 ) );
+		g_cameraUp = right.Cross( g_cameraLook );
+		g_cameraUp.Normalize();
+
+
+
+
+		Vec3d lookat = g_cameraPos + g_cameraLook;
+	#endif
+		myLookAt( g_cameraPos, lookat, g_cameraUp, g_matView );
+	}
+}
+
+/*
+ ================================
+ DrawFrame
+
+ This is the function that is repeatedly called.
+ And it is where all the magic happens.
+ ================================
+ */
+
+void DrawFrame( void ) {
+	Update();
+
 	const float bias_matrix[ 16 ] = {
 		0.5f, 0.0f, 0.0f, 0.0f,
         0.0f, 0.5f, 0.0f, 0.0f,
@@ -113,56 +239,6 @@ void DrawFrame( void ) {
 
 	const Vec3d sunDir = Vec3d( cosf( g_sunAngle ), 0.0f, sinf( g_sunAngle ) );
 
-	// Update the camera view matrix
-	const float radius = 1000;
-#if 0
-	const float angle = runTimeSeconds * 0.0613f;
-	g_cameraPos	= Vec3d( radius * cosf( angle ), radius * sinf( angle ), 300 );
-	Vec3d lookat = Vec3d( 0, 0, 50 );
-#elif 0
-	const float angle = runTimeSeconds * 0.013f;
-	g_cameraPos	= Vec3d( radius * cosf( angle ), radius * sinf( angle ), 400 );
-	g_cameraPos = g_terrain.GetSurfacePos( g_cameraPos ) + Vec3d( 0, 0, 2 );
-	g_cameraUp	= Vec3d( 0, 0, 1 );
- 	Vec3d lookat = g_cameraPos * 0.95f;
-	lookat = g_cameraPos;
-	lookat.x += -sinf( angle ) * 30.0f;
-	lookat.y += cosf( angle ) * 30.0f;
- 	lookat = g_terrain.GetSurfacePos( lookat ) + Vec3d( 0, 0, 2 );
-#else
-	const float pi = acosf( -1.0f );
-	if ( g_cameraPhi > pi * 0.9f ) {
-		g_cameraPhi = pi * 0.9f;
-	}
-	if ( g_cameraPhi < pi * 0.1f ) {
-		g_cameraPhi = pi * 0.1f;
-	}
-
-#if 0
-	float theta = -g_cameraTheta;
-	float phi = -g_cameraPhi;
-
-	Vec3d spherePos = Vec3d( cosf( theta ) * sinf( phi ), sinf( theta ) * sinf( phi ), cosf( phi ) );
-	g_cameraPos = spherePos * 1000.0f;
-	g_cameraLook = spherePos * -1.0f;
-#else
-	g_cameraLook = Vec3d( cosf( g_cameraTheta ) * sinf( g_cameraPhi ), sinf( g_cameraTheta ) * sinf( g_cameraPhi ), cosf( g_cameraPhi ) );
-	if ( !g_noclip ) {
-		g_cameraPos = g_terrain.GetSurfacePos( g_cameraPos ) + Vec3d( 0, 0, 2 );
-	}
-// 	const float upPhi = g_cameraPhi + pi * 0.5f;
-// 	g_cameraUp = Vec3d( cosf( g_cameraTheta ) * sinf( upPhi ), sinf( g_cameraTheta ) * sinf( upPhi ), cosf( upPhi ) );
-#endif
-	Vec3d right = g_cameraLook.Cross( Vec3d( 0, 0, 1 ) );
-	g_cameraUp = right.Cross( g_cameraLook );
-	g_cameraUp.Normalize();
-
-
-
-
-	Vec3d lookat = g_cameraPos + g_cameraLook;
-#endif
-	myLookAt( g_cameraPos, lookat, g_cameraUp, g_matView );
 
 	// This sets the perspective projection matrix
 	float matProj[ 16 ] = { 0 };
@@ -325,6 +401,7 @@ void DrawFrame( void ) {
 	//
 	//	Draw the clouds
 	//
+#if 0
 	{
 		CloudDrawParms_t parms;
 		parms.m_matProj = matProj;
@@ -334,6 +411,7 @@ void DrawFrame( void ) {
 		parms.m_time = g_timeTime;
 		CloudDraw( parms );
 	}
+#endif
 
 	//
 	//	Draw the sunlit megatextured terrain
@@ -518,138 +596,6 @@ void reshape( int w, int h ) {
     // TODO:    implement me
 }
 
-/*
- ================================
- keyboard
- ================================
- */
-void keyboard( unsigned char key, int x, int y ) {
-	Vec3d right = g_cameraLook.Cross( Vec3d( 0, 0, 1 ) );
-	right.Normalize();
-
-	Vec3d dir = Vec3d( 0 );
-	if ( key == 'w' || key == 'W' ) {
-		dir += g_cameraLook;
-	}
-	if ( key == 's' || key == 'S' ) {
-		dir -= g_cameraLook;
-	}
-	if ( key == 'd' || key == 'D' ) {
-		dir += right;
-	}
-	if ( key == 'a' || key == 'A' ) {
-		dir -= right;
-	}
-
-	if ( key == 'e' || key == 'E' ) {
-		dir += Vec3d( 0, 0, 100 );
-	}
-	if ( key == 'q' || key == 'Q' ) {
-		dir -= Vec3d( 0, 0, 100 );
-	}
-
-	float deltaSun = 0;
-	if ( key == 'o' || key == 'O' ) {
-		deltaSun += 3;
-	}
-	if ( key == 'p' || key == 'P' ) {
-		deltaSun -= 3;
-	}
-	g_sunAngle += deltaSun * g_dtSec;
-
-	float speed = 10.0f;
-	if ( g_noclip ) {
-		speed = 10000.0f;
-	}
-	g_cameraPos += dir * g_dtSec * speed;
-}
-
-/*
- ================================
- keyboardup
- ================================
- */
-void keyboardup( unsigned char key, int x, int y ) {
-	if ( 'n' == key ) {
-		g_noclip = !g_noclip;
-	}
-}
-
-/*
- ================================
- special
- ================================
- */
-bool ignoreRepeats = false;
-void special( int key, int x, int y ) {
-}
-
-/*
- ================================
- mouse
- ================================
- */
-void mouse( int button, int state, int x, int y ) {
-	// Convert from windows coords (origin at top right)
-	// To gl coords (origin at lower left)
-	y = g_screenHeight - y;
-}
-
-/*
- ================================
- motion
-
- * Updates mouse position when buttons are pressed
- ================================
- */
-void motion( int x, int y ) {
-	// Convert from windows coords (origin at top right)
-	// To gl coords (origin at lower left)
-	y = g_screenHeight - y;
-}
-
-/*
- ================================
- motionPassive
-
- * Updates mouse position when zero buttons are pressed
- ================================
- */
-void motionPassive( int x, int y ) {
-	// Convert from windows coords (origin at top right)
-	// To gl coords (origin at lower left)
-	y = g_screenHeight - y;
-
-	float dtX = g_prevMouseX - x;
-	float dtY = g_prevMouseY - y;
-
-	if ( fabsf( dtX ) > 100 ) {
-		dtX = 0;
-	}
-	if ( fabsf( dtY ) > 100 ) {
-		dtY = 0;
-	}
-
-	g_prevMouseX = x;
-	g_prevMouseY = y;
-
-	g_cameraTheta += dtX * g_dtSec;
-	g_cameraPhi += dtY * g_dtSec;
-}
-
-/*
- ================================
- entry
- ================================
- */
-void entry( int state ) {
-	if ( GLUT_ENTERED == state ) {
-		printf( "Mouse entered window\n" );
-	} else {
-		printf( "Mouse left window area\n" );
-	}
-}
-
 
 /*
  ================================
@@ -709,9 +655,6 @@ int main( int argc, char ** argv ) {
 	g_virtualTexture.Init();
 	g_virtualTexture.InitSamplerFeedback( g_screenWidth >> 2, g_screenHeight >> 2 );
 	//g_virtualTexture.InitSamplerFeedback( g_screenWidth, g_screenHeight );
-
-	g_targa.Load( "../../common/grass_diffuse.tga" );
-	g_texture.InitWithData( g_targa.DataPtr(), g_targa.GetWidth(), g_targa.GetHeight() );
 
 	{
 		Targa g_targa0;

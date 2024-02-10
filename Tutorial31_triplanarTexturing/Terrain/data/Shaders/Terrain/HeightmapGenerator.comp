@@ -217,9 +217,7 @@ vec4 HeightSample( vec2 coord, float width ) {
     vec3 v2 = vec3( uvb.x, uvb.y, ( h2.x - h.x ) );
 	v1 = normalize( v1 );
 	v2 = normalize( v2 );
-    //v1.Normalize();
-    //v2.Normalize();
-    vec3 normal = cross( v1, v2 );//v1.Cross( v2 );
+    vec3 normal = normalize( cross( v1, v2 ) );
     normal = vec3( normal.x, normal.z, normal.y );
 
     return vec4( h.x, normal.x, normal.z, h.y );
@@ -250,43 +248,7 @@ void main() {
 		coord.y = y + tileY * ( width - 1 ); // otherwise tiles won't line up properly
 		vec4 color = HeightSample( coord, width );
 
-		//int idx = x + width * y;
-		//heightmap[ idx ] = color;
-
 		imageStore( destTex, st, color );
-		
-		/*
-		vec3 data[ 4 ];
-		data[ 0 ] = imageLoad( sourceTex, STs[ 0 ] ).xyz;
-		data[ 1 ] = imageLoad( sourceTex, STs[ 1 ] ).xyz;
-		data[ 2 ] = imageLoad( sourceTex, STs[ 2 ] ).xyz;
-		data[ 3 ] = imageLoad( sourceTex, STs[ 3 ] ).xyz;
-		
-		float ds = patch_length / float( patch_dim );
-		
-		float dsdx = 2.0f * ds + ( data[ 1 ].x - data[ 0 ].x );
-		float dsdy = 2.0f * ds + ( data[ 3 ].y - data[ 2 ].y );
-		
-		float dzdx = data[ 1 ].z - data[ 0 ].z;
-		float dzdy = data[ 3 ].z - data[ 2 ].z;
-		
-		vec3 xdir = normalize( vec3( dsdx, 0.0, dzdx ) );
-		vec3 ydir = normalize( vec3( 0.0, dsdy, dzdy ) );
-		
-		vec3 normal = normalize( cross( xdir, ydir ) );// * 10.0f;
-		//vec3 normal = normalize( cross( ydir, xdir ) );
-		
-		// Calculate the jacobian here too
-		float Jacobian = 1.0f;
-		{
-			vec3 deltaX = data[ 1 ] - data[ 0 ];
-			vec3 deltaY = data[ 3 ] - data[ 2 ];
-			Jacobian = ( 1.0f + deltaX.x ) * ( 1.0f + deltaY.y ) - deltaX.y * deltaY.x;
-		}
-		//Jacobian = 1.0f;
-		
-		imageStore( destTex, stCenter, vec4( normal.x, normal.y, normal.z, Jacobian ) );
-		*/
 	}
 }
  

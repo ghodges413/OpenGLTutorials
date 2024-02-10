@@ -175,6 +175,9 @@
     <ClCompile Include="..\code\Clouds\WorleyNoise.cpp">
       <Filter>code\Clouds</Filter>
     </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\Input.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\code\Terrain\Heightmap.h">
@@ -338,6 +341,9 @@
     </ClInclude>
     <ClInclude Include="..\code\Clouds\WorleyNoise.h">
       <Filter>code\Clouds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Input.h">
+      <Filter>code\Miscellaneous</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
