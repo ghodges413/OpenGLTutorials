@@ -1,0 +1,43 @@
+//
+//  Terrain.h
+//
+#pragma once
+#include "Terrain/TerrainTile.h"
+#include "Terrain/TerrainPool.h"
+#include "Math/Frustum.h"
+
+#define TILES_WIDE 5
+#define NUM_TILES ( TILES_WIDE * TILES_WIDE )
+#define MAX_RENDER_NODES 256	// On a 5x5 tile grid, the max nodes used were 70, so this should be more than enough of a buffer
+
+/*
+================================
+Terrain
+================================
+*/
+class Terrain {
+public:
+	Terrain() { m_numRenderNodes = 0; }
+	~Terrain() { CleanupIslandPool(); }
+
+	void Terraform();
+	void Update( Vec3d pos );
+	void Update( Vec3d pos, Frustum view );
+	void Draw();
+	void DrawDebug( class Shader * shader );
+	Vec3d GetSurfacePos( Vec3d pos ) const;
+	float SampleHeightMap( Vec2d st ) const;
+	Vec4d SampleColorMap( Vec2d st ) const;
+
+private:
+	void StitchTerrainSeams();
+	int SampleLod( Vec3d pt );
+
+private:
+	TerrainTile m_tiles[ NUM_TILES ];	// Each tile is 2km x 2km, so 5 x 5 tiles will make 10km x 10km
+
+	terrainNode_t * m_renderNodes[ MAX_RENDER_NODES ];
+	int m_numRenderNodes;	// the number of render nodes this frame
+
+	Bounds m_bounds;	// The bounds for the whole terrain
+};

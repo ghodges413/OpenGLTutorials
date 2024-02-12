@@ -1,0 +1,38 @@
+/*
+ ==============================================================
+ CopyInitInscatter.comp
+ 
+ Builds the initial Scattering Table
+ Copies the initial change in scattering into the scattering table.
+ It is step number 5 from Bruneton2008 Algorithm 4.1
+ The algorithm describes calculating the single scattering and storing it in
+ the delta scatter table.  We need to copy the single scattering into the main
+ 3D inscatter table.  Both tables need it so that we can calculate the delta
+ between scatterings.
+ ==============================================================
+ */
+#version 440
+
+//layout ( location = 0 )
+uniform writeonly image3D destTex;
+//layout ( location = 1, rgba32f ) uniform readonly image3D deltaScatterSampler;
+uniform sampler3D deltaScatterSampler;
+uniform vec3 dimensions;
+
+layout ( local_size_x = 16, local_size_y = 16, local_size_z = 4 ) in;
+
+/*
+ ===============================
+ main
+ ===============================
+ */
+void main() {
+	ivec3 coord = ivec3( gl_GlobalInvocationID.xyz );
+	
+	//vec4 data = imageLoad( deltaScatterSampler, coord );
+	vec3 str = ( gl_GlobalInvocationID.xyz + vec3( 0.5 ) ) / dimensions.xyz;
+	vec4 data = texture( deltaScatterSampler, str );
+
+	// Store off the scattering
+	imageStore( destTex, coord, data );
+}

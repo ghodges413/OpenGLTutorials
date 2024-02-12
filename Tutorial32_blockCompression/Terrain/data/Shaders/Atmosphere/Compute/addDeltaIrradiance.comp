@@ -1,0 +1,38 @@
+/*
+ ==============================================================
+ AddDeltaIrradiance.comp
+ 
+ Appends the change in the ground irradiance to the main ground irradiance table.
+ It is step number 10 from Bruneton2008 Algorithm 4.1
+ ==============================================================
+ */
+#version 440
+
+layout ( local_size_x = 16, local_size_y = 16 ) in;
+
+layout ( rgba32f ) uniform image2D destTex;
+uniform vec2 dimensions;
+
+uniform sampler2D deltaESampler;
+
+/*
+ ===============================
+ main
+ ===============================
+ */
+void main() {
+	ivec2 storePos = ivec2( gl_GlobalInvocationID.xy );
+	vec2 st = ( gl_GlobalInvocationID.xy + vec2( 0.5 ) ) / dimensions.xy;
+	
+	// Get the change in irradiance
+    vec4 deltaIrradiance = texture( deltaESampler, st );
+	
+	// Get the current irradiance
+	vec4 irradiance = imageLoad( destTex, storePos );
+	
+	// Append the change to the total
+	irradiance += deltaIrradiance;
+	
+	// Store the new total irradiance
+	imageStore( destTex, storePos.xy, irradiance );
+}
