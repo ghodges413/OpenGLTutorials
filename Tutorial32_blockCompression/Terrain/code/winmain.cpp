@@ -597,6 +597,13 @@ void reshape( int w, int h ) {
     // TODO:    implement me
 }
 
+int ColorAverage( int a, int b, int c, int d ) {
+	float f = a * a + b * b + c * c + d * d;
+	f *= 0.25f;
+	f = sqrtf( f );
+	return (int)f;
+}
+
 void MipInPlace( unsigned char * data, int width ) {
 	int target = 0;
 	for ( int y = 0; y < width - 1; y += 2 ) {
@@ -610,6 +617,10 @@ void MipInPlace( unsigned char * data, int width ) {
 			int G = data[ source0 * 4 + 1 ] + data[ source1 * 4 + 1 ] + data[ source2 * 4 + 1 ] + data[ source3 * 4 + 1 ];
 			int B = data[ source0 * 4 + 2 ] + data[ source1 * 4 + 2 ] + data[ source2 * 4 + 2 ] + data[ source3 * 4 + 2 ];
 			int A = data[ source0 * 4 + 3 ] + data[ source1 * 4 + 3 ] + data[ source2 * 4 + 3 ] + data[ source3 * 4 + 3 ];
+// 			R = ColorAverage( data[ source0 * 4 + 0 ], data[ source1 * 4 + 0 ], data[ source2 * 4 + 0 ], data[ source3 * 4 + 0 ] ) * 4;
+// 			G = ColorAverage( data[ source0 * 4 + 1 ], data[ source1 * 4 + 1 ], data[ source2 * 4 + 1 ], data[ source3 * 4 + 1 ] ) * 4;
+// 			B = ColorAverage( data[ source0 * 4 + 2 ], data[ source1 * 4 + 2 ], data[ source2 * 4 + 2 ], data[ source3 * 4 + 2 ] ) * 4;
+// 			A = ColorAverage( data[ source0 * 4 + 3 ], data[ source1 * 4 + 3 ], data[ source2 * 4 + 3 ], data[ source3 * 4 + 3 ] ) * 4;
 
 			data[ target * 4 + 0 ] = R / 4;
 			data[ target * 4 + 1 ] = G / 4;
@@ -639,7 +650,14 @@ void MipMapAndCompress( const Targa & image, int name, int layer ) {
 			MipInPlace( data, w << 1 );
 		}
 
+#if 1
+		int numOutBytes = 0;
+		uint8 * compressed = (uint8 *)malloc( width * width * 4 );
+		CompressImageDXT1( data, compressed, width, width, numOutBytes );
+		//void CompressImageDXT5( const byte *inBuf, byte *outBuf, int width, int height, int &outputBytes )
+#else
 		uint8 * compressed = RGBAtoBC1( data, w, w );
+#endif
 		int size = w * w / 2;	// bc1 is 4-bits per texel
 		int offX = 0;
 		int offY = 0;

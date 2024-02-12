@@ -2,6 +2,7 @@
 //  PageTable.cpp
 //
 #include "VirtualTexture/PageTable.h"
+#include "Graphics/BlockCompression.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/Targa.h"
 #include "Math/Perlin.h"
@@ -379,6 +380,8 @@ PhysicalTexture
 ================================================================
 */
 
+#define USE_COMPRESSION
+
 /*
 ================================
 PhysicalTexture::Init
@@ -389,7 +392,14 @@ void PhysicalTexture::Init() {
 	glBindTexture( GL_TEXTURE_2D, m_textureID );
 
 	// Allocate one mip level
+#if defined( USE_COMPRESSION )
+	int width = PHYSICAL_TEXTURE_WIDTH;
+	int height = PHYSICAL_TEXTURE_WIDTH;
+	int size = PHYSICAL_TEXTURE_WIDTH * PHYSICAL_TEXTURE_WIDTH / 2;	// bc1 is 4-bits per texel
+	glCompressedTexImage2D( GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB_S3TC_DXT1_EXT, width, height, 0, size, nullptr );
+#else
 	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, PHYSICAL_TEXTURE_WIDTH, PHYSICAL_TEXTURE_WIDTH, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr );
+#endif
 
 	// Set addressing mode:
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
@@ -470,6 +480,8 @@ void doit( int value, int offsetY, unsigned char * pix ) {
 
 //#define DEBUG_PAGE_COORDS
 
+static uint8 s_bc1[ PAGE_WIDTH * PAGE_WIDTH ];
+
 /*
 ================================
 PhysicalTexture::UploadPage
@@ -498,12 +510,33 @@ void PhysicalTexture::UploadPage( int vtX, int vtY, int ptX, int ptY, int mip, u
 // 		//pix[ 4 * i + 0 ] >>= mip;
 // 	}
 
+#if defined( USE_COMPRESSION )
+#if 1
+	int outputBytes = 0;
+	CompressImageDXT1( pix, s_bc1, PAGE_WIDTH, PAGE_WIDTH, outputBytes );
+	glBindTexture( GL_TEXTURE_2D, m_textureID );
+	int width = PAGE_WIDTH;
+	int height = PAGE_WIDTH;
+	int size = PAGE_WIDTH * PAGE_WIDTH / 2; // bc1 is 4-bits per texel
+	glCompressedTexSubImage2D( GL_TEXTURE_2D, 0, ptX * PAGE_WIDTH, ptY * PAGE_WIDTH, width, height, GL_COMPRESSED_RGB_S3TC_DXT1_EXT, size, s_bc1 );
+	glBindTexture( GL_TEXTURE_2D, 0 );
+#else
+	uint8 * bc1 = RGBAtoBC1( pix, PAGE_WIDTH, PAGE_WIDTH );
+	glBindTexture( GL_TEXTURE_2D, m_textureID );
+	int width = PAGE_WIDTH;
+	int height = PAGE_WIDTH;
+	int size = PAGE_WIDTH * PAGE_WIDTH / 2; // bc1 is 4-bits per texel
+	glCompressedTexSubImage2D( GL_TEXTURE_2D, 0, ptX * PAGE_WIDTH, ptY * PAGE_WIDTH, width, height, GL_COMPRESSED_RGB_S3TC_DXT1_EXT, size, bc1 );
+	glBindTexture( GL_TEXTURE_2D, 0 );
+	free( bc1 );
+#endif
+#else
 	glBindTexture( GL_TEXTURE_2D, m_textureID );
 	glTexSubImage2D( GL_TEXTURE_2D, 0, ptX * PAGE_WIDTH, ptY * PAGE_WIDTH, PAGE_WIDTH, PAGE_WIDTH, GL_RGBA, GL_UNSIGNED_BYTE, pix );
 	glBindTexture( GL_TEXTURE_2D, 0 );
-	free( pix );
+#endif
 
-	myglGetError();
+	free( pix );
 }
 
 /*
