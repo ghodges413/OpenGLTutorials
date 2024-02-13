@@ -35,3 +35,4 @@ uint8 * RGBAtoBC1( const uint8 * colors, int width, int height );
 
 void CompressImageDXT1( const uint8 *inBuf, uint8 *outBuf, int width, int height, int &outputBytes );
 void CompressImageDXT5( const uint8 *inBuf, uint8 *outBuf, int width, int height, int &outputBytes );
+void CompressImageDXT5_YCoCg( const uint8 *inBuf, uint8 *outBuf, int width, int height, int &outputBytes );

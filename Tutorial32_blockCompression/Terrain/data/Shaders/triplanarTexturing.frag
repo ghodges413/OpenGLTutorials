@@ -199,6 +199,29 @@ vec4 TriplanarMapping( vec3 pos, vec3 normal, sampler2D tex ) {
 	return color;
 }
 
+// Normal conversion from CoCg_Y to RGB
+vec4 CoCg_YtoRGB( vec4 color ) {
+    float Co = color.x - ( 0.5 * 256.0 / 255.0 );
+    float Cg = color.y - ( 0.5 * 256.0 / 255.0 );
+    float Y = color.w;
+    float R = Y + Co - Cg;
+    float G = Y + Cg;
+    float B = Y - Co - Cg;
+    return vec4( R, G, B, 1 );
+}
+
+// Greyscaled conversion from CoCg_Y to RGB (the version we will be using)
+vec4 ScaledCoCg_YtoRGB( vec4 color ) {
+    float scale = ( color.z * ( 255.0 / 8.0 ) ) + 1.0;
+    float Co = ( color.x - ( 0.5 * 256.0 / 255.0 ) ) / scale;
+    float Cg = ( color.y - ( 0.5 * 256.0 / 255.0 ) ) / scale;
+    float Y = color.w;
+    float R = Y + Co - Cg;
+    float G = Y + Cg;
+    float B = Y - Co - Cg;
+    return vec4( R, G, B, 1 );
+}
+
 /*
 ==========================
 main

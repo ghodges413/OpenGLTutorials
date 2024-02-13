@@ -16,6 +16,7 @@ enum TextureFormat_t {
 	FMT_RG16F,
 	FMT_R16F,
 	FMT_BC1,
+	FMT_BC3,
 	//FMT_DEPTH,
 };
 

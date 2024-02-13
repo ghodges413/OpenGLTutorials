@@ -238,6 +238,14 @@ void Texture::InitializeFormat( const void * data ) {
 			int z = m_opts.dimZ > 0 ? m_opts.dimZ : 1;
 			size = x * y * z / 2;	// bc1 is 4-bits per texel
 		} break;
+		case FMT_BC3: {
+			internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+			isCompressed = true;
+			int x = m_opts.dimX;
+			int y = m_opts.dimY > 0 ? m_opts.dimY : 1;
+			int z = m_opts.dimZ > 0 ? m_opts.dimZ : 1;
+			size = x * y * z;	// bc3 is 8-bits per texel
+		} break;
 	};
 	myglGetError();
 	if ( isCompressed ) {

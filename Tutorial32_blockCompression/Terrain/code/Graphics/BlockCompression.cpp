@@ -35,7 +35,8 @@ void TestF32toF16() {
 #if 0
 
 //
-//	This HLSL code is from the "Real-Time BC6H Compression on GPU" article in GPU Pro 7
+//	This HLSL code is from the "Real-Time BC6H Compression on GPU" article in GPU Pro 7.
+//	It compresses using mode 11 for bc6h.
 //
 
 
@@ -859,3 +860,189 @@ void CompressImageDXT5( const uint8 *inBuf, uint8 *outBuf, int width, int height
 	outputBytes = globalOutData - outBuf;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 1
+// Covariance is calculated to determine the best of the two diagonals in the 2d CoCg space
+void SelectYCoCgDiagonal( const uint8 *colorBlock, uint8 *minColor, uint8 *maxColor ) {
+	uint8 mid0 = ( (int) minColor[0] + maxColor[0] + 1 ) >> 1;
+	uint8 mid1 = ( (int) minColor[1] + maxColor[1] + 1 ) >> 1;
+	int covariance = 0;
+	for ( int i = 0; i < 16; i++ ) {
+		int b0 = colorBlock[i*4+0] - mid0;
+		int b1 = colorBlock[i*4+1] - mid1;
+		covariance += ( b0 * b1 );
+	}
+	if ( covariance < 0 ) {
+		uint8 t = minColor[1];
+		minColor[1] = maxColor[1];
+		maxColor[1] = t;
+	}
+}
+#else
+// Covariance only uses the sign bit of the two diagnols to choose which one to use.
+// This is faster, but lower quality.
+void SelectYCoCgDiagonal( const uint8 *colorBlock, uint8 *minColor, uint8 *maxColor ) {
+	uint8 mid0 = ( (int) minColor[0] + maxColor[0] + 1 ) >> 1;
+	uint8 mid1 = ( (int) minColor[1] + maxColor[1] + 1 ) >> 1;
+	uint8 side = 0;
+	for ( int i = 0; i < 16; i++ ) {
+		uint8 b0 = colorBlock[i*4+0] >= mid0;
+		uint8 b1 = colorBlock[i*4+1] >= mid1;
+		side += ( b0 ^ b1 );
+	}
+	uint8 mask = -( side > 8 );
+	uint8 c0 = minColor[1];
+	uint8 c1 = maxColor[1];
+	c0 ^= c1 ^= mask &= c0 ^= c1;
+	minColor[1] = c0;
+	maxColor[1] = c1;
+}
+#endif
+
+#define INSET_COLOR_SHIFT 4 // inset color bounding box 
+#define INSET_ALPHA_SHIFT 5 // inset alpha bounding box 
+#define C565_5_MASK 0xF8 // 0xFF minus last three bits 
+#define C565_6_MASK 0xFC // 0xFF minus last two bits 
+void InsetYCoCgBBox( uint8 *minColor, uint8 *maxColor ) {
+	int inset[4];
+	int mini[4];
+	int maxi[4];
+	inset[0] = ( maxColor[0] - minColor[0] ) - ( ( 1 << INSET_COLOR_SHIFT ) + inset[0] ) >> INSET_COLOR_SHIFT;
+	mini[1] = ( ( minColor[1] << INSET_COLOR_SHIFT ) + inset[1] ) >> INSET_COLOR_SHIFT;
+	mini[3] = ( ( minColor[3] << INSET_ALPHA_SHIFT ) + inset[3] ) >> INSET_ALPHA_SHIFT;
+	maxi[0] = ( ( maxColor[0] << INSET_COLOR_SHIFT ) - inset[0] ) >> INSET_COLOR_SHIFT;
+	maxi[1] = ( ( maxColor[1] << INSET_COLOR_SHIFT ) - inset[1] ) >> INSET_COLOR_SHIFT;
+	maxi[3] = ( ( maxColor[3] << INSET_ALPHA_SHIFT ) - inset[3] ) >> INSET_ALPHA_SHIFT;
+	mini[0] = ( mini[0] >= 0 ) ? mini[0] : 0;
+	mini[1] = ( mini[1] >= 0 ) ? mini[1] : 0;
+	mini[3] = ( mini[3] >= 0 ) ? mini[3] : 0;
+	maxi[0] = ( maxi[0] <= 255 ) ? maxi[0] : 255;
+	maxi[1] = ( maxi[1] <= 255 ) ? maxi[1] : 255;
+	maxi[3] = ( maxi[3] <= 255 ) ? maxi[3] : 255;
+	minColor[0] = ( mini[0] & C565_5_MASK ) | ( mini[0] >> 5 );
+	minColor[1] = ( mini[1] & C565_6_MASK ) | ( mini[1] >> 6 );
+	minColor[3] = mini[3];
+	maxColor[0] = ( maxi[0] & C565_5_MASK ) | ( maxi[0] >> 5 );
+	maxColor[1] = ( maxi[1] & C565_6_MASK ) | ( maxi[1] >> 6 );
+	maxColor[3] = maxi[3];
+}
+
+void ScaleYCoCg( uint8 *colorBlock, uint8 *minColor, uint8 *maxColor ) {
+	int m0 = abs( minColor[0] - 128 );
+	int m1 = abs( minColor[1] - 128 );
+	int m2 = abs( maxColor[0] - 128 );
+	int m3 = abs( maxColor[1] - 128 );
+	if ( m1 > m0 ) m0 = m1;
+	if ( m3 > m2 ) m2 = m3;
+	if ( m2 > m0 ) m0 = m2;
+	const int s0 = 128 / 2 - 1;
+	const int s1 = 128 / 4 - 1;
+	int mask0 = -( m0 <= s0 );
+	int mask1 = -( m0 <= s1 );
+	int scale = 1 + ( 1 & mask0 ) + ( 2 & mask1 );
+	minColor[0] = ( minColor[0] - 128 ) * scale + 128;
+	minColor[1] = ( minColor[1] - 128 ) * scale + 128;
+	minColor[2] = ( scale - 1 ) << 3;
+	maxColor[0] = ( maxColor[0] - 128 ) * scale + 128;
+	maxColor[1] = ( maxColor[1] - 128 ) * scale + 128;
+	maxColor[2] = ( scale - 1 ) << 3;
+	for ( int i = 0; i < 16; i++ ) {
+		colorBlock[i*4+0] = ( colorBlock[i*4+0] - 128 ) * scale + 128;
+		colorBlock[i*4+1] = ( colorBlock[i*4+1] - 128 ) * scale + 128;
+	}
+}
+
+// Vec3d RGB2YCoCg( Vec3d rgb ) {
+// 	Mat3 mat;
+// 	mat.rows[ 0 ] = Vec3d( 0.25f, 0.5f, 0.25f );
+// 	mat.rows[ 1 ] = Vec3d( 0.5f, 0, -0.5f );
+// 	mat.rows[ 2 ] = Vec3d( -0.25f, 0.5f, -0.25f );
+// 	Vec3d yog = mat * rgb;
+// 	return yog;
+// }
+
+// Normal conversion from CoCg_Y to RGB
+// Co = color.x - ( 0.5 * 256.0 / 255.0 ) 
+// Cg = color.y - ( 0.5 * 256.0 / 255.0 ) 
+// Y = color.w 
+// R = Y + Co - Cg 
+// G = Y + Cg 
+// B = Y - Co - Cg
+
+// Greyscaled conversion from CoCg_Y to RGB (the version we will be using)
+// scale = ( color.z * ( 255.0 / 8.0 ) ) + 1.0 
+// Co = ( color.x - ( 0.5 * 256.0 / 255.0 ) ) / scale 
+// Cg = ( color.y - ( 0.5 * 256.0 / 255.0 ) ) / scale 
+// Y = color.w 
+// R = Y + Co - Cg 
+// G = Y + Cg 
+// B = Y - Co - Cg
+void BlockToCoCg_Y( uint8 * block ) {
+	// input is RGBA, converts to CoCg_Y
+	for ( int y = 0; y < 4; y++ ) {
+		for ( int x = 0; x < 4; x++ ) {
+			int idx = x + y * 4;
+			int R = block[ idx * 4 + 0 ];
+			int G = block[ idx * 4 + 1 ];
+			int B = block[ idx * 4 + 2 ];
+			//int A = block[ idx * 4 + 3 ];	// unused for our application
+
+			int Y = ( R >> 2 ) + ( G >> 1 ) + ( B >> 2 );
+			int Co = ( R >> 1 ) - ( B >> 1 );
+			int Cg = -( R >> 2 ) + ( G >> 1 ) - ( B >> 2 );
+			Co += 128;
+			Cg += 128;
+
+			block[ idx * 4 + 0 ] = (uint8)Co;
+			block[ idx * 4 + 1 ] = (uint8)Cg;
+			block[ idx * 4 + 2 ] = 0;
+			block[ idx * 4 + 3 ] = (uint8)Y;
+		}
+	}
+}
+
+void CompressImageDXT5_YCoCg( const uint8 *inBuf, uint8 *outBuf, int width, int height, int &outputBytes ) {
+// 	ALIGN16( uint8 block[64] );
+// 	ALIGN16( uint8 minColor[4] );
+// 	ALIGN16( uint8 maxColor[4] );
+	uint8 block[64];
+	uint8 minColor[4];
+	uint8 maxColor[4];
+
+	globalOutData = outBuf;
+	for ( int j = 0; j < height; j += 4, inBuf += width * 4*4 ) {
+		for ( int i = 0; i < width; i += 4 ) {
+			ExtractBlock( inBuf + i * 4, width, block );
+			BlockToCoCg_Y( block );// TODO: Convert block CoCg_Y
+			GetMinMaxColors4( block, minColor, maxColor );	// For RGBA onlys (maybe it isn't rgba only?)
+			SelectYCoCgDiagonal( block, minColor, maxColor );// TODO: Select the diagonal
+			ScaleYCoCg( block, minColor, maxColor );// TODO: ScaleYCoCg
+			// TODO: Convert to 565 compression <- I don't think this step is necessary
+			InsetYCoCgBBox( minColor, maxColor );// TODO: InsetYCoCg <- I think this stage actually converts it 565
+			// TODO: Emit maxColor
+			// TODO: Emit minColor
+			
+			EmitByte( maxColor[3] );
+			EmitByte( minColor[3] );
+			EmitAlphaIndices( block, minColor[3], maxColor[3] );
+			EmitWord( ColorTo565( maxColor ) );
+			EmitWord( ColorTo565( minColor ) );
+			EmitColorIndices3( block, minColor, maxColor );
+		}
+	}
+	outputBytes = globalOutData - outBuf;
+}

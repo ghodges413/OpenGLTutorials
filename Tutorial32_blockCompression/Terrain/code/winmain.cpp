@@ -608,19 +608,34 @@ void MipInPlace( unsigned char * data, int width ) {
 	int target = 0;
 	for ( int y = 0; y < width - 1; y += 2 ) {
 		for ( int x = 0; x < width - 1; x += 2 ) {
-			int source0 = x + y * width;
-			int source1 = source0 + 1;
-			int source2 = source0 + width;
-			int source3 = source0 + width + 1;
+			int source[ 4 ];
+			source[ 0 ] = x + y * width;
+			source[ 1 ] = source[ 0 ] + 1;
+			source[ 2 ] = source[ 0 ] + width;
+			source[ 3 ] = source[ 0 ] + width + 1;
 
-			int R = data[ source0 * 4 + 0 ] + data[ source1 * 4 + 0 ] + data[ source2 * 4 + 0 ] + data[ source3 * 4 + 0 ];
-			int G = data[ source0 * 4 + 1 ] + data[ source1 * 4 + 1 ] + data[ source2 * 4 + 1 ] + data[ source3 * 4 + 1 ];
-			int B = data[ source0 * 4 + 2 ] + data[ source1 * 4 + 2 ] + data[ source2 * 4 + 2 ] + data[ source3 * 4 + 2 ];
-			int A = data[ source0 * 4 + 3 ] + data[ source1 * 4 + 3 ] + data[ source2 * 4 + 3 ] + data[ source3 * 4 + 3 ];
-// 			R = ColorAverage( data[ source0 * 4 + 0 ], data[ source1 * 4 + 0 ], data[ source2 * 4 + 0 ], data[ source3 * 4 + 0 ] ) * 4;
-// 			G = ColorAverage( data[ source0 * 4 + 1 ], data[ source1 * 4 + 1 ], data[ source2 * 4 + 1 ], data[ source3 * 4 + 1 ] ) * 4;
-// 			B = ColorAverage( data[ source0 * 4 + 2 ], data[ source1 * 4 + 2 ], data[ source2 * 4 + 2 ], data[ source3 * 4 + 2 ] ) * 4;
-// 			A = ColorAverage( data[ source0 * 4 + 3 ], data[ source1 * 4 + 3 ], data[ source2 * 4 + 3 ], data[ source3 * 4 + 3 ] ) * 4;
+#if 1
+			// Block average mipmapping
+			int R = data[ source[ 0 ] * 4 + 0 ] + data[ source[ 1 ] * 4 + 0 ] + data[ source[ 2 ] * 4 + 0 ] + data[ source[ 3 ] * 4 + 0 ];
+			int G = data[ source[ 0 ] * 4 + 1 ] + data[ source[ 1 ] * 4 + 1 ] + data[ source[ 2 ] * 4 + 1 ] + data[ source[ 3 ] * 4 + 1 ];
+			int B = data[ source[ 0 ] * 4 + 2 ] + data[ source[ 1 ] * 4 + 2 ] + data[ source[ 2 ] * 4 + 2 ] + data[ source[ 3 ] * 4 + 2 ];
+			int A = data[ source[ 0 ] * 4 + 3 ] + data[ source[ 1 ] * 4 + 3 ] + data[ source[ 2 ] * 4 + 3 ] + data[ source[ 3 ] * 4 + 3 ];
+#elif 0
+			// Gamma corrected mipmapping
+			int R = ColorAverage( data[ source[ 0 ] * 4 + 0 ], data[ source[ 1 ] * 4 + 0 ], data[ source[ 2 ] * 4 + 0 ], data[ source[ 3 ] * 4 + 0 ] ) * 4;
+			int G = ColorAverage( data[ source[ 0 ] * 4 + 1 ], data[ source[ 1 ] * 4 + 1 ], data[ source[ 2 ] * 4 + 1 ], data[ source[ 3 ] * 4 + 1 ] ) * 4;
+			int B = ColorAverage( data[ source[ 0 ] * 4 + 2 ], data[ source[ 1 ] * 4 + 2 ], data[ source[ 2 ] * 4 + 2 ], data[ source[ 3 ] * 4 + 2 ] ) * 4;
+			int A = ColorAverage( data[ source[ 0 ] * 4 + 3 ], data[ source[ 1 ] * 4 + 3 ], data[ source[ 2 ] * 4 + 3 ], data[ source[ 3 ] * 4 + 3 ] ) * 4;
+#elif 1
+			// Stochastic mip-mapping
+			int idx = rand() % 4;
+			int R = data[ source[ idx ] * 4 + 0 ] * 4;
+			int G = data[ source[ idx ] * 4 + 1 ] * 4;
+			int B = data[ source[ idx ] * 4 + 2 ] * 4;
+			int A = data[ source[ idx ] * 4 + 3 ] * 4;
+#elif 0
+			// There's other forms of mipmapping.  Luminance based (pick the brightest texel).  There's probably guassian, and a plethora of others.
+#endif	
 
 			data[ target * 4 + 0 ] = R / 4;
 			data[ target * 4 + 1 ] = G / 4;
@@ -641,7 +656,8 @@ void MipMapAndCompress( const Targa & image, int name, int layer ) {
 	assert( width == height );
 	int lod = 0;
 	unsigned char * data = (unsigned char *)malloc( width * width * 4 );
-	
+	uint8 * compressed = (uint8 *)malloc( width * width * 4 );
+
 	memcpy( data, image.DataPtr(), width * width * 4 );
 
 	int w = width;
@@ -649,29 +665,27 @@ void MipMapAndCompress( const Targa & image, int name, int layer ) {
 		if ( w < width ) {
 			MipInPlace( data, w << 1 );
 		}
-
-#if 1
-		int numOutBytes = 0;
-		uint8 * compressed = (uint8 *)malloc( width * width * 4 );
-		CompressImageDXT1( data, compressed, width, width, numOutBytes );
-		//void CompressImageDXT5( const byte *inBuf, byte *outBuf, int width, int height, int &outputBytes )
-#else
-		uint8 * compressed = RGBAtoBC1( data, w, w );
-#endif
 		int size = w * w / 2;	// bc1 is 4-bits per texel
+
+		int numOutBytes = 0;
+		CompressImageDXT1( data, compressed, w, w, numOutBytes );
+		//CompressImageDXT5( data, compressed, w, w, numOutBytes );
+		size = numOutBytes;
+
 		int offX = 0;
 		int offY = 0;
 		int offZ = layer;
 		int depth = 1;
 		glCompressedTexSubImage3D( GL_TEXTURE_2D_ARRAY, lod, offX, offY, offZ, w, w, depth, GL_COMPRESSED_RGB_S3TC_DXT1_EXT, size, compressed );
+		//glCompressedTexSubImage3D( GL_TEXTURE_2D_ARRAY, lod, offX, offY, offZ, w, w, depth, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, size, compressed );
 		myglGetError();
 
 		lod++;
 		w = w >> 1;
-		free( compressed );
 	}
 	glBindTexture( GL_TEXTURE_2D_ARRAY, 0 );
 	free( data );
+	free( compressed );
 }
 
 /*
