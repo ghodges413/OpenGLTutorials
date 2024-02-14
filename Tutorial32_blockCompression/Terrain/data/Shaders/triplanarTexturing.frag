@@ -3,8 +3,10 @@
 
 in vec3 v_pos;
 in vec2 v_st;
-in vec3 v_color;
 in vec3 v_normal;
+in vec3 v_tangent;
+in vec3 v_bitangent;
+in vec3 v_color;
 
 uniform vec3 sunDir;
 
@@ -199,6 +201,53 @@ vec4 TriplanarMapping( vec3 pos, vec3 normal, sampler2D tex ) {
 	return color;
 }
 
+vec4 TiledTriplanarMapping( vec3 pos, vec3 normal, float slice, sampler2DArray tex ) {
+	float scale = 100.0;
+	vec4 dx = texture( tex, vec3( pos.zy / scale, slice ) );
+	vec4 dy = texture( tex, vec3( pos.xz / scale, slice ) );
+	vec4 dz = texture( tex, vec3( pos.xy / scale, slice ) );
+
+	vec3 weights = abs( normal.xyz );
+	weights = weights / ( weights.x + weights.y + weights.z );
+
+	vec4 color = dx * weights.x + dy * weights.y + dz * weights.z;
+	return color;
+}
+
+vec3 UnpackNormal( vec3 n ) {
+    n.x = ( n.x - 0.5 ) * 2.0;
+    n.y = -( n.y - 0.5 ) * 2.0;  // TODO: double check if this needs to be negative or not
+    return n;
+}
+
+vec3 TiledTriplanarNormalMapping( vec3 pos, vec3 normal, float slice, sampler2DArray tex ) {
+	float scale = 100.0;
+	vec4 dx = texture( tex, vec3( pos.zy / scale, slice ) );
+	vec4 dy = texture( tex, vec3( pos.xz / scale, slice ) );
+	vec4 dz = texture( tex, vec3( pos.xy / scale, slice ) );
+
+	vec3 weights = abs( normal.xyz );
+	weights = weights / ( weights.x + weights.y + weights.z );
+
+    // GPU Gems 3 blend (https://bgolus.medium.com/normal-mapping-for-a-triplanar-shader-10bf39dca05a)
+    // We also might want to look into an alternative:
+    // https://mmikkelsen3d.blogspot.com/2011/07/derivative-maps.html
+    // Perhaps mikktspace is better suited for triplanar mapping
+    // Tangent space normal maps
+    vec3 tnormalX = UnpackNormal( dx.xyz );
+    vec3 tnormalY = UnpackNormal( dy.xyz );
+    vec3 tnormalZ = UnpackNormal( dz.xyz );
+
+    // Swizzle tangemt normals into world space and zero out "z"
+    vec3 normalX = vec3( 0.0, tnormalX.yx );
+    vec3 normalY = vec3( tnormalY.x, 0.0, tnormalY.y );
+    vec3 normalZ = vec3( tnormalZ.xy, 0.0 );
+
+    vec3 worldNormal = normalX.xyz * weights.x + normalY.xyz * weights.y + normalZ.xyz * weights.z + normal;
+    return normalize( worldNormal );
+}
+
+
 // Normal conversion from CoCg_Y to RGB
 vec4 CoCg_YtoRGB( vec4 color ) {
     float Co = color.x - ( 0.5 * 256.0 / 255.0 );
@@ -230,19 +279,29 @@ main
 void main() {
 	float slice = ( v_pos.z + 50.0 ) / 50.0;
 
-	float slice0 = floor( slice );
-	float slice1 = ceil( slice );
+	float slice0 = clamp( floor( slice ), 0.0, 4.0 );
+	float slice1 = clamp( ceil( slice ), 0.0, 4.0 );
 	float t = fract( slice );
 	t = smoothstep( 0.0, 1.0, t );
 
+    vec3 normal = v_normal.xyz;
 #if 0
     vec4 color = TriplanarMapping( v_pos, v_normal, textureArray0 );
-#else
-	vec4 color = TriplanarMapping( v_pos, v_normal, slice0, textureArray0 );
-	vec4 colorB = TriplanarMapping( v_pos, v_normal, slice1, textureArray0 );
+#elif 0
+    // Triplanar mapping + texture bombing
+	vec4 color = TriplanarMapping( v_pos, v_normal, slice0 * 2.0 + 0.0, textureArray0 );
+	vec4 colorB = TriplanarMapping( v_pos, v_normal, slice1 * 2.0 + 0.0, textureArray0 );
 	color = mix( color, colorB, t );
+#else
+    vec4 color = TiledTriplanarMapping( v_pos, v_normal, slice0 * 2.0 + 0.0, textureArray0 );
+	vec4 colorB = TiledTriplanarMapping( v_pos, v_normal, slice1 * 2.0 + 0.0, textureArray0 );
+	color = mix( color, colorB, t );
+
+    vec3 normalA = TiledTriplanarNormalMapping( v_pos, v_normal, slice0 * 2.0 + 0.0, textureArray0 );
+	vec3 normalB = TiledTriplanarNormalMapping( v_pos, v_normal, slice1 * 2.0 + 0.0, textureArray0 );
+	normal = mix( normalA, normalB, t );
 #endif
 
-	color.rgb *= max( dot( sunDir, v_normal ), 0.1 );
+	color.rgb *= max( dot( sunDir, normal ), 0.1 );
 	diffuseColor = color;
 }

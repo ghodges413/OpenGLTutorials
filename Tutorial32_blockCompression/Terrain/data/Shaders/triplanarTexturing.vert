@@ -16,6 +16,8 @@ uniform mat4 matProj;
 out vec3 v_pos;
 out vec2 v_st;
 out vec3 v_normal;
+out vec3 v_tangent;
+out vec3 v_bitangent;
 out vec3 v_color;
 
 /*
@@ -30,4 +32,9 @@ void main() {
 	v_color	= color.rgb;
 	v_normal = normal.rgb;
 	v_normal = 2.0 * ( normal.xyz - vec3( 0.5 ) ); // convert from [0,1] to [-1,1]
+	v_normal = ( matModelWorld * vec4( v_normal.xyz, 1.0 ) ).xyz;
+	v_tangent = tangent.rgb;
+	v_tangent = 2.0 * ( tangent.xyz - vec3( 0.5 ) ); // convert from [0,1] to [-1,1]
+	v_tangent = ( matModelWorld * vec4( v_tangent.xyz, 1.0 ) ).xyz;
+	v_bitangent = cross( v_normal, v_tangent );
 }

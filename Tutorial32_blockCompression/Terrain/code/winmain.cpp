@@ -648,7 +648,7 @@ void MipInPlace( unsigned char * data, int width ) {
 }
 
 #include "Graphics/BlockCompression.h"
-void MipMapAndCompress( const Targa & image, int name, int layer ) {
+void MipMapAndCompress( const Targa & image, int name, int layer, bool doCompression ) {
 	glBindTexture( GL_TEXTURE_2D_ARRAY, name );
 
 	int width = image.GetWidth();
@@ -665,19 +665,22 @@ void MipMapAndCompress( const Targa & image, int name, int layer ) {
 		if ( w < width ) {
 			MipInPlace( data, w << 1 );
 		}
-		int size = w * w / 2;	// bc1 is 4-bits per texel
-
-		int numOutBytes = 0;
-		CompressImageDXT1( data, compressed, w, w, numOutBytes );
-		//CompressImageDXT5( data, compressed, w, w, numOutBytes );
-		size = numOutBytes;
 
 		int offX = 0;
 		int offY = 0;
 		int offZ = layer;
 		int depth = 1;
-		glCompressedTexSubImage3D( GL_TEXTURE_2D_ARRAY, lod, offX, offY, offZ, w, w, depth, GL_COMPRESSED_RGB_S3TC_DXT1_EXT, size, compressed );
-		//glCompressedTexSubImage3D( GL_TEXTURE_2D_ARRAY, lod, offX, offY, offZ, w, w, depth, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, size, compressed );
+
+		if ( doCompression ) {
+			int size = 0;
+			CompressImageDXT1( data, compressed, w, w, size );
+			//CompressImageDXT5( data, compressed, w, w, numOutBytes );
+		
+			glCompressedTexSubImage3D( GL_TEXTURE_2D_ARRAY, lod, offX, offY, offZ, w, w, depth, GL_COMPRESSED_RGB_S3TC_DXT1_EXT, size, compressed );
+			//glCompressedTexSubImage3D( GL_TEXTURE_2D_ARRAY, lod, offX, offY, offZ, w, w, depth, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, size, compressed );
+		} else {
+			glTexSubImage3D( GL_TEXTURE_2D_ARRAY, lod, offX, offY, offZ, w, w, depth, GL_RGBA, GL_UNSIGNED_BYTE, data );
+		}
 		myglGetError();
 
 		lod++;
@@ -748,16 +751,17 @@ int main( int argc, char ** argv ) {
 	//g_virtualTexture.InitSamplerFeedback( g_screenWidth, g_screenHeight );
 
 	{
-		Targa g_targa0;
-		Targa g_targa1;
-		Targa g_targa2;
-		Targa g_targa3;
-		Targa g_targa4;
-		g_targa0.Load( "../../common/pebbles_diffuse.tga" );
-		g_targa1.Load( "../../common/grass_diffuse.tga" );
-		g_targa2.Load( "../../common/dirt_diffuse.tga" );
-		g_targa3.Load( "../../common/rock045_diffuse.tga" );
-		g_targa4.Load( "../../common/snow001_diffuse.tga" );
+		Targa targa[ 10 ];
+		targa[ 0 ].Load( "../../common/pebbles_diffuse.tga" );
+		targa[ 1 ].Load( "../../common/pebbles_normal.tga" );
+		targa[ 2 ].Load( "../../common/grass_diffuse.tga" );
+		targa[ 3 ].Load( "../../common/grass_normal.tga" );
+		targa[ 4 ].Load( "../../common/dirt_diffuse.tga" );
+		targa[ 5 ].Load( "../../common/dirt_normal.tga" );
+		targa[ 6 ].Load( "../../common/rock045_diffuse.tga" );
+		targa[ 7 ].Load( "../../common/rock045_normal.tga" );
+		targa[ 8 ].Load( "../../common/snow001_diffuse.tga" );
+		targa[ 9 ].Load( "../../common/snow001_normal.tga" );
 
 #if 1
 		{
@@ -769,16 +773,15 @@ int main( int argc, char ** argv ) {
 			opts.magFilter = FM_LINEAR;
 			opts.dimX = 1024;
 			opts.dimY = 1024;
-			opts.dimZ = 5;
+			opts.dimZ = 10;
 			opts.type = TT_TEXTURE_2D_ARRAY;
 			opts.format = FMT_BC1;
+			opts.format = FMT_RGBA8;
 			g_textureArray = g_textureManager->GetTexture( "_textureArray", opts, NULL );
 		}
-		MipMapAndCompress( g_targa0, g_textureArray->GetName(), 0 );
-		MipMapAndCompress( g_targa1, g_textureArray->GetName(), 1 );
-		MipMapAndCompress( g_targa2, g_textureArray->GetName(), 2 );
-		MipMapAndCompress( g_targa3, g_textureArray->GetName(), 3 );
-		MipMapAndCompress( g_targa4, g_textureArray->GetName(), 4 );
+		for ( int i = 0; i < 10; i++ ) {
+			MipMapAndCompress( targa[ i ], g_textureArray->GetName(), i, false );
+		}
 #elif 1
 		{
 			TextureOpts_t opts;
