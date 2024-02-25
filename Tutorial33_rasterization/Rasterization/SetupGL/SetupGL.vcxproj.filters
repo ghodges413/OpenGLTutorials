@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="code">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="code\Math">
+      <UniqueIdentifier>{9d3854e9-ed71-49a7-b4ce-d27f557a8731}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Graphics">
+      <UniqueIdentifier>{578766e6-9f00-412e-b800-dda0d470d496}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Miscellaneous">
+      <UniqueIdentifier>{c443f767-6ef5-42d5-acca-59b40483c403}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Rasterization">
+      <UniqueIdentifier>{17746ea8-b5cb-4c08-ad23-b107d0f3520a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\code\winmain.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Frustum.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Matrix.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\MatrixOps.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Vector.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Plane.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Graphics.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Mesh.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\RenderSurface.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Shader.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Targa.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Texture.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\VertexArrayObject.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\VertexBufferObject.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\Fileio.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\Time.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Sphere.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\String.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\ShaderManager.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\TextureManager.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Fourier.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Math.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Quat.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Random.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Perlin.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\Input.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\BlockCompression.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Rasterization\Rasterization.cpp">
+      <Filter>code\Rasterization</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\code\Math\Bounds.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Frustum.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Matrix.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\MatrixOps.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Vector.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Plane.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Graphics.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Mesh.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\RenderSurface.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Shader.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Targa.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Texture.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\VertexArrayObject.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\VertexBufferObject.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Array.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Fileio.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Pair.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Time.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Types.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Sphere.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Comparison.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\String.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\ShaderManager.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\TextureManager.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Complex.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Fourier.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Math.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Quat.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Random.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Perlin.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Input.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\BlockCompression.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Rasterization\Rasterization.h">
+      <Filter>code\Rasterization</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
