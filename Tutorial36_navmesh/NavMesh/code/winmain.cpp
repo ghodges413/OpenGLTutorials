@@ -499,8 +499,7 @@ int main( int argc, char ** argv ) {
 	printf( "GL_VERSION:  %s\n", (const char *)glGetString( GL_VERSION ) );
 
 	LoadMap();
-	BuildNavVoxels();
-	BuildNavMesh();
+	LoadNavMesh();
 
 	g_shaderManager = new hbShaderManager;
 	g_textureManager = new TextureManager;

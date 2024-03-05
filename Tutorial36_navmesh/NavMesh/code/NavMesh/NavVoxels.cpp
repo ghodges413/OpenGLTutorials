@@ -36,7 +36,7 @@ std::vector< winding_t > s_navWindings;
 
 std::vector< vert_t > s_navVoxelsVerts;
 std::vector< int > s_navVoxelsIndices;
-//std::vector< Bounds > s_navmeshBounds;
+
 
 static VertexBufferObject s_navVoxelsVBO;
 static VertexArrayObject s_navVoxelsVAO;
@@ -103,18 +103,6 @@ bool IsPointInsideTriangle( const Vec2 & pt, const Vec2 & a, const Vec2 & b, con
 		return true;
 	}
 	return false;
-
-// 	if ( det0 < 0.0f ) {
-// 		return false;
-// 	}
-// 	if ( det1 < 0.0f ) {
-// 		return false;
-// 	}
-// 	if ( det2 < 0.0f ) {
-// 		return false;
-// 	}
-// 
-// 	return true;
 }
 
 bool DoesSegmentBoundsIntersect( const Vec2 & mins, const Vec2 & maxs, const Vec2 & a, const Vec2 & b ) {
@@ -243,7 +231,7 @@ void BuildByRasterizationTriangles() {
 	//
 
 	//
-	// Convert upward facing brushes into triangles
+	//	Rasterize triangles into voxels
 	//
 	for ( int b = 0; b < g_brushes.size(); b++ ) {
 		const brush_t & brush = g_brushes[ b ];
@@ -505,31 +493,7 @@ void BuildByVoxelizingBrushes() {
 					continue;
 				}
 
-				// This is temp, just for only catching the slope voxels
-// 				Bounds bounds;
-// 				for ( int i = 0; i < winding.pts.size(); i++ ) {
-// 					bounds.Expand( winding.pts[ i ] );
-// 				}
-// 				if ( !bounds.DoesIntersect( voxel.bounds ) ) {
-// 					continue;
-// 				}
-
-				if ( plane.normal.z < 0.9f ) {
-					static volatile int poopoo = 0;
-					poopoo++;
-				}
-
-// 				if ( plane.normal.z > 0.9f ) {
-// 					continue;
-// 				}
-
-				Vec3 tmp[ 4 ];
-// 				Vec3 a = voxel.pos + Vec3( 0, 0, VOXEL_RES );
-// 				Vec3 b = voxel.pos - Vec3( 0, 0, VOXEL_RES );
-// 				if ( !SegmentPlaneIntersection( plane, a, b, tmp[ 0 ] ) ) {
-// 					continue;
-// 				}
-
+				
 				Vec3 as[ 4 ];
 				Vec3 bs[ 4 ];
 				const float halfres = VOXEL_RES * 0.5f;
@@ -543,19 +507,11 @@ void BuildByVoxelizingBrushes() {
 				bs[ 2 ] = voxel.pos + Vec3(-halfres,-halfres,-VOXEL_RES * 2.0f );
 				bs[ 3 ] = voxel.pos + Vec3( halfres,-halfres,-VOXEL_RES * 2.0f );
 
+				Vec3 tmp[ 4 ];
 				tmp[ 0 ] = pts[ 0 ];
 				tmp[ 1 ] = pts[ 1 ];
 				tmp[ 2 ] = pts[ 2 ];
 				tmp[ 3 ] = pts[ 3 ];
-
-// 				Vec3 a = voxel.pos + Vec3( 0, 0, VOXEL_RES * 2.0f );
-// 				Vec3 b = voxel.pos - Vec3( 0, 0, VOXEL_RES * 2.0f );
-// 				if ( !SegmentPlaneIntersection( plane, a, b, tmp[ 0 ] ) ) {
-// 					continue;
-// 				}
-// 				tmp[ 1 ].z = tmp[ 0 ].z;
-// 				tmp[ 2 ].z = tmp[ 0 ].z;
-// 				tmp[ 3 ].z = tmp[ 0 ].z;
 				
 				for ( int i = 0; i < 4; i++ ) {
 					if ( !SegmentPlaneIntersection( plane, as[ i ], bs[ i ], tmp[ i ] ) ) {
@@ -563,17 +519,6 @@ void BuildByVoxelizingBrushes() {
 					}
 				}
 
-
-// 				if ( !SegmentPlaneIntersection( plane, as[ 1 ], bs[ 1 ], tmp[ 1 ] ) ) {
-// 					continue;
-// 				}
-// 				if ( !SegmentPlaneIntersection( plane, as[ 2 ], bs[ 2 ], tmp[ 2 ] ) ) {
-// 					continue;
-// 				}
-// 				if ( !SegmentPlaneIntersection( plane, as[ 3 ], bs[ 3 ], tmp[ 3 ] ) ) {
-// 					continue;
-// 				}
-#if 1
 				// Check that these points are inside the winding
 				for ( int i = 0; i < 4; i++ ) {
 					const int num = winding.pts.size();
@@ -599,7 +544,7 @@ void BuildByVoxelizingBrushes() {
 						}
 					}
 				}
-#endif
+
 				// If there was a successful projection, copy it over
 				for ( int i = 0; i < 4; i++ ) {
 					if ( tmp[ i ].z > pts[ i ].z ) {
@@ -671,29 +616,6 @@ void BuildByVoxelizingBrushes() {
 		// Merge neighboring windings
 		for ( int i = 0; i < source.size(); i++ ) {
 			const winding_t & windingA = source[ i ];
-
-			// Only select this if it's on the right grid point
-			int skipSize = ( numIters + 2 ) / 2;
-			float skipf = float( skipSize ) * VOXEL_RES * 2.0f;
-
-			float x = windingA.pts[ 0 ][ axis ];
-			float check = x / skipf;
-			float frac = check - floorf( check );
-			if ( fabsf( frac - 0.5f ) > 0.1f ) {
-			//	continue;
-			}
-
-			// convert x into an integer distance
-			x /= VOXEL_RES;
-			frac = x - floorf( x );
-			int ix = int( x );
-			if ( frac > 0.9f ) {
-				ix = int( x ) + 1;
-			}
-
-			if ( ( ix % ( skipSize * 2 ) ) != 0 ) {
-				//continue;
-			}
 
 			for ( int j = 0; j < source.size(); j++ ) {
 				const winding_t & windingB = source[ j ];

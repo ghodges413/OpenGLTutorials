@@ -262,6 +262,9 @@
     <ClCompile Include="..\code\NavMesh\NavVoxels.cpp">
       <Filter>code\NavMesh</Filter>
     </ClCompile>
+    <ClCompile Include="..\code\NavMesh\NavFile.cpp">
+      <Filter>code\NavMesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\code\Math\Bounds.h">
@@ -499,6 +502,9 @@
       <Filter>code\NavMesh</Filter>
     </ClInclude>
     <ClInclude Include="..\code\NavMesh\NavVoxels.h">
+      <Filter>code\NavMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\NavMesh\NavFile.h">
       <Filter>code\NavMesh</Filter>
     </ClInclude>
   </ItemGroup>

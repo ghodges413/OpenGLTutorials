@@ -187,6 +187,7 @@ xcopy /y $(SolutionDir)libs\glew-1.10.0\bin\Release\x64\glew32.dll $(SolutionDir
     <ClCompile Include="..\code\Miscellaneous\Input.cpp" />
     <ClCompile Include="..\code\Miscellaneous\String.cpp" />
     <ClCompile Include="..\code\Miscellaneous\Time.cpp" />
+    <ClCompile Include="..\code\NavMesh\NavFile.cpp" />
     <ClCompile Include="..\code\NavMesh\NavMesh.cpp" />
     <ClCompile Include="..\code\NavMesh\NavVoxels.cpp" />
     <ClCompile Include="..\code\NavMesh\PathFinding.cpp" />
@@ -268,6 +269,7 @@ xcopy /y $(SolutionDir)libs\glew-1.10.0\bin\Release\x64\glew32.dll $(SolutionDir
     <ClInclude Include="..\code\Miscellaneous\String.h" />
     <ClInclude Include="..\code\Miscellaneous\Time.h" />
     <ClInclude Include="..\code\Miscellaneous\Types.h" />
+    <ClInclude Include="..\code\NavMesh\NavFile.h" />
     <ClInclude Include="..\code\NavMesh\NavMesh.h" />
     <ClInclude Include="..\code\NavMesh\NavVoxels.h" />
     <ClInclude Include="..\code\NavMesh\PathFinding.h" />

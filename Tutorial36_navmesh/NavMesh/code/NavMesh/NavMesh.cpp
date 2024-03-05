@@ -8,6 +8,8 @@
 #include "Graphics/TextureManager.h"
 #include "Graphics/ShaderManager.h"
 #include "NavMesh/NavMesh.h"
+#include "NavMesh/NavVoxels.h"
+#include "NavMesh/NavFile.h"
 #include <math.h>
 #include <algorithm>
 #include <stdlib.h>
@@ -32,6 +34,46 @@ NavMesh
 ================================================================
 */
 
+void BuildNavMeshRenderGeo() {
+	const int sizeIBO = s_navmeshIndices.size() * sizeof( unsigned int );
+	s_navmeshIBO.Generate( GL_ELEMENT_ARRAY_BUFFER, sizeIBO, &s_navmeshIndices[ 0 ], GL_STATIC_DRAW );
+
+	const int stride = sizeof( vert_t );
+	const int sizeVBO = s_navmeshVerts.size() * stride;
+	s_navmeshVBO.Generate( GL_ARRAY_BUFFER, sizeVBO, &s_navmeshVerts[ 0 ], GL_DYNAMIC_DRAW );
+
+	s_navmeshVAO.Generate();
+	s_navmeshVAO.Bind();
+    
+	s_navmeshVBO.Bind();
+	s_navmeshIBO.Bind();
+
+	unsigned long offset = 0;
+	glEnableVertexAttribArray( 0 );
+	glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, stride, (const void *)offset );
+	offset += sizeof( Vec3 );
+    
+	glEnableVertexAttribArray( 1 );
+	glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, stride, (const void *)offset );
+	offset += sizeof( Vec2 );
+    
+	glEnableVertexAttribArray( 2 );
+	glVertexAttribPointer( 2, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, (const void *)offset );
+	offset += sizeof( unsigned char ) * 4;
+    
+	glEnableVertexAttribArray( 3 );
+	glVertexAttribPointer( 3, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, (const void *)offset );
+	offset += sizeof( unsigned char ) * 4;
+
+	glEnableVertexAttribArray( 4 );
+	glVertexAttribPointer( 4, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, (const void *)offset );
+	offset += sizeof( unsigned char ) * 4;
+
+	s_navmeshVAO.UnBind();
+	s_navmeshVBO.UnBind();
+	s_navmeshIBO.UnBind();
+}
+
 /*
 ================================
 IsEdgeShared
@@ -55,10 +97,13 @@ extern std::vector< winding_t > s_navWindings;
 
 /*
 ================================
-BuildNavMesh
+LoadNavMesh
 ================================
 */
-void BuildNavMesh() {
+void LoadNavMesh() {
+	if ( ReadNavFile() ) {
+		return;
+	}
 	// First we build the bounds around the brushes
 	// Then voxelize the brushes
 	// Then square off contiguous voxels
@@ -72,6 +117,8 @@ void BuildNavMesh() {
 	std::vector< int > triIndices;
 
 #if defined( USE_NAV_VOXELS )
+	BuildNavVoxels();
+
 	for ( int w = 0; w < s_navWindings.size(); w++ ) {
 		const winding_t & winding = s_navWindings[ w ];
 
@@ -362,44 +409,10 @@ void BuildNavMesh() {
 		Vec3ToByte4_n11( vert.buff, Vec3( 0.5f, 0.5f, 1.0f ) );
 		s_navmeshVerts.push_back( vert );
 	}
-	
-	const int sizeIBO = s_navmeshIndices.size() * sizeof( unsigned int );
-	s_navmeshIBO.Generate( GL_ELEMENT_ARRAY_BUFFER, sizeIBO, &s_navmeshIndices[ 0 ], GL_STATIC_DRAW );
+	BuildNavMeshRenderGeo();
 
-	const int stride = sizeof( vert_t );
-	const int sizeVBO = s_navmeshVerts.size() * stride;
-	s_navmeshVBO.Generate( GL_ARRAY_BUFFER, sizeVBO, &s_navmeshVerts[ 0 ], GL_DYNAMIC_DRAW );
-
-	s_navmeshVAO.Generate();
-	s_navmeshVAO.Bind();
-    
-	s_navmeshVBO.Bind();
-	s_navmeshIBO.Bind();
-
-	unsigned long offset = 0;
-	glEnableVertexAttribArray( 0 );
-	glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, stride, (const void *)offset );
-	offset += sizeof( Vec3 );
-    
-	glEnableVertexAttribArray( 1 );
-	glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, stride, (const void *)offset );
-	offset += sizeof( Vec2 );
-    
-	glEnableVertexAttribArray( 2 );
-	glVertexAttribPointer( 2, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, (const void *)offset );
-	offset += sizeof( unsigned char ) * 4;
-    
-	glEnableVertexAttribArray( 3 );
-	glVertexAttribPointer( 3, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, (const void *)offset );
-	offset += sizeof( unsigned char ) * 4;
-
-	glEnableVertexAttribArray( 4 );
-	glVertexAttribPointer( 4, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride, (const void *)offset );
-	offset += sizeof( unsigned char ) * 4;
-
-	s_navmeshVAO.UnBind();
-	s_navmeshVBO.UnBind();
-	s_navmeshIBO.UnBind();
+	// Write the nav mesh file
+	WriteNavFile();
 }
 
 /*

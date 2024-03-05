@@ -9,10 +9,5 @@
 #include "Miscellaneous/Types.h"
 #include "BSP/Brush.h"
 
-// void BuildNavMesh();
-// void DrawNavMesh();
-// void DrawNavMeshTriangle( Vec3 pt, Shader * shader );
-// void DrawNavMeshNeighborTriangle( Vec3 pt, Shader * shader );
-
 void BuildNavVoxels();
 void DrawNavVoxels();

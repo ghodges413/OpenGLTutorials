@@ -1,5 +1,5 @@
 //
-//  NavMesh.h
+//  NavFile.h
 //
 #pragma once
 #include "Math/Vector.h"
@@ -9,9 +9,7 @@
 #include "Miscellaneous/Types.h"
 #include "BSP/Brush.h"
 
-void LoadNavMesh();
-void DrawNavMesh();
-void DrawNavMeshTriangle( Vec3 pt, Shader * shader );
-void DrawNavMeshNeighborTriangle( Vec3 pt, Shader * shader );
+bool ReadNavFile();
+bool WriteNavFile();
 
 
