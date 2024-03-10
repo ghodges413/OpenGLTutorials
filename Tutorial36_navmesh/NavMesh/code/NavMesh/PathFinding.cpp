@@ -211,7 +211,7 @@ Vec3 PathFind( const Vec3 & start, const Vec3 & end ) {
 
 		// Add the current node to the closed list and remove from the open list
 		g_closedList.push_back( currentNode );
-		g_openList.erase( g_openList.begin() + 0 );
+		g_openList.erase( g_openList.begin() + bestIdx );
 
 		// Calculating neighboring heuristics and add to the open list
 		for ( int i = 0; i < num; i++ ) {
