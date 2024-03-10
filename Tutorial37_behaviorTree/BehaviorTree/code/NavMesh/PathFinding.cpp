@@ -13,8 +13,21 @@ extern std::vector< int > s_navmeshIndices;
 extern std::vector< Bounds > s_navmeshBounds;
 extern std::vector< navEdge_t > s_navmeshEdges;
 
+extern std::vector< winding_t > s_navWindings;
+
+#define USE_WINDINGS
+
 
 Vec3 GetNodePos( int idx ) {
+#if defined( USE_WINDINGS )
+	const winding_t & winding = s_navWindings[ idx ];
+	Vec3 avg( 0, 0, 0 );
+	for ( int i = 0; i < winding.pts.size(); i++ ) {
+		avg += winding.pts[ i ];
+	}
+	avg /= (float)winding.pts.size();
+	return avg;
+#else
 	int idx0 = s_navmeshIndices[ 3 * idx + 0 ];
 	int idx1 = s_navmeshIndices[ 3 * idx + 1 ];
 	int idx2 = s_navmeshIndices[ 3 * idx + 2 ];
@@ -24,10 +37,47 @@ Vec3 GetNodePos( int idx ) {
 	Vec3 c = s_navmeshVerts[ idx2 ].pos;
 
 	return ( a + b + c ) / 3.0f;
+#endif
 }
 
 
 int GetNodeIndex( Vec3 pt ) {
+#if defined( USE_WINDINGS )
+	for ( int i = 0; i < s_navWindings.size(); i++ ) {
+		const Bounds & bounds = s_navmeshBounds[ i ];
+		if ( !bounds.DoesIntersect( pt ) ) {
+			continue;
+		}
+
+		const winding_t & winding = s_navWindings[ i ];
+		Vec3 AB = winding.pts[ 1 ] - winding.pts[ 0 ];
+		Vec3 AC = winding.pts[ 2 ] - winding.pts[ 0 ];
+		Vec3 norm = AB.Cross( AC );
+		norm.Normalize();
+
+		bool isInside = true;
+		const int num = winding.pts.size();
+		for ( int j = 0; j < num; j++ ) {
+			const Vec3 & a = winding.pts[ ( j + 0 ) % num ];
+			const Vec3 & b = winding.pts[ ( j + 1 ) % num ];
+			const Vec3 & c = pt;
+
+			Vec3 ab = b - a;
+			Vec3 ac = c - a;
+
+			Vec3 norm2 = ab.Cross( ac );
+			float dot = norm.Dot( norm2 );
+			if ( dot < 0.0f ) {
+				isInside = false;
+				break;
+			}
+		}
+
+		if ( isInside ) {
+			return i;
+		}
+	}
+#else
 	for ( int i = 0; i < s_navmeshBounds.size(); i++ ) {
 		const Bounds & bounds = s_navmeshBounds[ i ];
 		if ( !bounds.DoesIntersect( pt ) ) {
@@ -57,11 +107,12 @@ int GetNodeIndex( Vec3 pt ) {
 
 		return i;
 	}
+#endif
 	return -1;
 }
 
 
-int GetNodeNeighborIndices( const Vec3 & pt, int * tris ) {
+int GetNodeNeighborIndices( const Vec3 & pt, std::vector< int > & tris ) {
 	int idx = GetNodeIndex( pt );
 	if ( -1 == idx ) {
 		return 0;
@@ -71,11 +122,8 @@ int GetNodeNeighborIndices( const Vec3 & pt, int * tris ) {
 	for ( int i = 0; i < g_navAdjacencyMatrix.numDimensions; i++ ) {
 		float val = g_navAdjacencyMatrix.rows[ idx ][ i ];
 		if ( val > 0 ) {
-			tris[ num ] = i;
+			tris.push_back( i );
 			++num;
-		}
-		if ( 3 == num ) {
-			break;
 		}
 	}
 
@@ -215,7 +263,8 @@ bool PathFind( const Vec3 & start, const Vec3 & end, std::vector< Vec3 > & path,
 		}
 		
 		// Get the neighboring node indices for the starting position
-		int nodes[ 3 ];
+		//int nodes[ 3 ];
+		std::vector< int > nodes;
 		int num = GetNodeNeighborIndices( currentNode.pos, nodes );
 		if ( 0 == num ) {
 			return false;
@@ -224,7 +273,7 @@ bool PathFind( const Vec3 & start, const Vec3 & end, std::vector< Vec3 > & path,
 
 		// Add the current node to the closed list and remove from the open list
 		g_closedList.push_back( currentNode );
-		g_openList.erase( g_openList.begin() + 0 );
+		g_openList.erase( g_openList.begin() + bestIdx );
 
 		// Calculating neighboring heuristics and add to the open list
 		for ( int i = 0; i < num; i++ ) {
@@ -305,10 +354,6 @@ bool PathFind( const Vec3 & start, const Vec3 & end, std::vector< Vec3 > & path,
 		path.push_back( g_finalPath[ i ].pos );// Don't put the position of starting node in the output path list
 	}
 	
-
-	int nextTile = g_finalPath.size() - 2;
-	Vec3 nextPos = g_finalPath[ nextTile ].pos;
-	//return nextPos;
 	return true;
 }
 

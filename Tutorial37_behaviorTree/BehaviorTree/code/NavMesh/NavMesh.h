@@ -16,7 +16,8 @@ struct navEdge_t {
 
 void LoadNavMesh();
 void DrawNavMesh();
-void DrawNavMeshTriangle( Vec3 pt, Shader * shader );
+void DrawNavMeshEdges( Shader * shader );
+void DrawNavMeshNode( Vec3 pt, Shader * shader );
 void DrawNavMeshNeighborTriangle( Vec3 pt, Shader * shader );
 
 

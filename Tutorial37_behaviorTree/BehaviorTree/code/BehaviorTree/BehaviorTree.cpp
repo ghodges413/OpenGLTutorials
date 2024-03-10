@@ -22,9 +22,6 @@ static std::vector< btNode_t * > s_nodeStack; // The stack of currently active n
 // Node ( find next point to walk to ) -> Node ( walk to point )
 // Repeat this action until having reached player position
 
-btState_t Root( btNode_t * thisNode ) {
-	return BT_RUNNING;	// The root always returns running
-}
 
 btState_t SpiderRoot( btNode_t * thisNode ) {
 	// This is a selector node
@@ -100,7 +97,7 @@ btState_t WalkToPosition( btNode_t * thisNode ) {
 		targetPos = ( edge.a + edge.b ) * 0.5f;
 
 		delta = targetPos - start;
-		if ( delta.GetMagnitude() < 0.01f ) {
+		if ( delta.GetMagnitude() < 0.05f ) {
 			targetPos = end;
 			if ( g_pathPts.size() > 1 ) {
 				edge = edges[ 1 ];

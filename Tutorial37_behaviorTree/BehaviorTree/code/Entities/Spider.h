@@ -60,8 +60,6 @@ public:
 	const md5Skeleton_t *	mSkeleton;
 
 	aiState_t m_state;
-    
-    //hbRenderEntity_t mRenderEntity;
 };
 
 

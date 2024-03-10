@@ -97,6 +97,236 @@ bool IsEdgeShared( const int edge0A, const int edge0B, const int edge1A, const i
 #define USE_NAV_VOXELS
 extern std::vector< winding_t > s_navWindings;
 
+bool AreSegmentsParallel( const Vec3 & a, const Vec3 & b, const Vec3 & c, const Vec3 & d ) {
+	Vec3 ab = b - a;
+	Vec3 cd = d - c;
+	ab.Normalize();
+	cd.Normalize();
+
+	// Check for Parallel
+	if ( fabsf( ab.Dot( cd ) ) < 0.99f ) {
+		return false;
+	}
+
+	return true;
+}
+
+bool AreSegmentsColinear( const Vec3 & a, const Vec3 & b, const Vec3 & c, const Vec3 & d ) {
+	if ( !AreSegmentsParallel( a, b, c, d ) ) {
+		return false;
+	}
+
+	// Check for co-linear
+	Vec3 ab = b - a;
+	Vec3 ac = c - a;
+	Vec3 ad = d - a;
+	Vec3 bc = c - b;
+	Vec3 bd = d - b;
+	ab.Normalize();
+	ac.Normalize();
+	ad.Normalize();
+	bc.Normalize();
+	bd.Normalize();
+
+	// It's possible that a is a shared point with c or d.
+	// So, one dot product can be zero... but if both are less than one, then it's not colinear
+	float dotAC = ab.Dot( ac );
+	float dotAD = ab.Dot( ad );
+	float dotBC = ab.Dot( bc );
+	float dotBD = ab.Dot( bd );
+	if ( fabsf( dotAC ) < 0.999f && fabsf( dotAC ) > 0.001f ) {
+		return false;
+	}
+	if ( fabsf( dotAD ) < 0.999f && fabsf( dotAD ) > 0.001f ) {
+		return false;
+	}
+	if ( fabsf( dotBC ) < 0.999f && fabsf( dotBC ) > 0.001f ) {
+		return false;
+	}
+	if ( fabsf( dotBD ) < 0.999f && fabsf( dotBD ) > 0.001f ) {
+		return false;
+	}
+
+	return true;
+}
+
+bool DoSegmentsOverlap( const Vec3 & a, const Vec3 & b, const Vec3 & c, const Vec3 & d, Vec3 & sharedA, Vec3 & sharedB ) {
+	if ( !AreSegmentsColinear( a, b, c, d ) ) {
+		return false;
+	}	
+
+	// Now we need to project c & d onto ab's line and determine overlap
+	Vec3 ab = b - a;
+	Vec3 ac = c - a;
+	Vec3 ad = d - a;
+	float ta = 0;
+	float tb = ab.GetMagnitude();
+	ab.Normalize();
+	float tc = ab.Dot( ac );
+	float td = ab.Dot( ad );
+
+	if ( tc > td ) {
+		std::swap( tc, td );
+	}
+
+	if ( td <= ta ) {
+		return false;
+	}
+
+	if ( tc >= tb ) {
+		return false;
+	}
+
+	float tmin = ( tc < ta ) ? ta : tc;
+	float tmax = ( td < tb ) ? td : tb;
+
+	sharedA = a + ab * tmin;
+	sharedB = a + ab * tmax;
+
+	Vec3 delta = sharedB - sharedA;
+	if ( delta.GetMagnitude() < 0.1f ) {
+		return false;
+	}
+
+	
+
+	return true;
+}
+
+void BuildWindingNavMesh() {
+	s_navmeshEdges.clear();
+	const int N = s_navWindings.size();
+	g_navAdjacencyMatrix = MatN( N );
+	g_navEdgeListMatrix = MatN( N );
+	for ( int i = 0; i < N; i++ ) {
+		for ( int j = 0; j < N; j++ ) {
+			g_navAdjacencyMatrix.rows[ i ][ j ] = 0;
+			g_navAdjacencyMatrix.rows[ j ][ i ] = 0;
+
+			g_navEdgeListMatrix.rows[ i ][ j ] = -1;
+			g_navEdgeListMatrix.rows[ j ][ i ] = -1;
+		}
+	}
+
+	//
+	//	Find the shared edges and build the adjacency matrix
+	//
+	for ( int i = 0; i < s_navWindings.size(); i++ ) {
+		winding_t & windingA = s_navWindings[ i ];
+
+		for ( int j = i + 1; j < s_navWindings.size(); j++ ) {
+			winding_t & windingB = s_navWindings[ j ];
+
+			// for each edge in A, check each edge in B, to determine if there's overlap
+			bool doOverlap = false;
+			const int numA = windingA.pts.size();
+			const int numB = windingB.pts.size();
+			for ( int edgeA = 0; edgeA < numA; edgeA++ ) {
+				navEdge_t a;
+				a.a = windingA.pts[ ( edgeA + 0 ) % numA ];
+				a.b = windingA.pts[ ( edgeA + 1 ) % numA ];
+				for ( int edgeB = 0; edgeB < windingB.pts.size(); edgeB++ ) {
+					navEdge_t b;
+					b.a = windingB.pts[ ( edgeB + 0 ) % numB ];
+					b.b = windingB.pts[ ( edgeB + 1 ) % numB ];
+
+					// Check for overlap of these windings.  If there is a shared edge,
+					// then store the shared edge and record it in the adjacency matrix.
+					navEdge_t shared;
+					doOverlap = DoSegmentsOverlap( a.a, a.b, b.a, b.b, shared.a, shared.b );
+					if ( doOverlap ) {
+						const int idx = s_navmeshEdges.size();
+						s_navmeshEdges.push_back( shared );
+
+						g_navAdjacencyMatrix.rows[ i ][ j ] = 1;
+						g_navAdjacencyMatrix.rows[ j ][ i ] = 1;
+
+						g_navEdgeListMatrix.rows[ i ][ j ] = idx;
+						g_navEdgeListMatrix.rows[ j ][ i ] = idx;
+						break;
+					}
+				}
+				if ( doOverlap ) {
+					break;
+				}
+			}			
+		}
+	}
+
+	//
+	//	Build the bounds for each triangle
+	//
+	for ( int i = 0; i < s_navWindings.size(); i++ ) {
+		const winding_t & winding = s_navWindings[ i ];
+
+		Bounds bounds;
+		bounds.Clear();
+		for ( int j = 0; j < winding.pts.size(); j++ ) {
+			Vec3 ptA = winding.pts[ j ];
+			bounds.Expand( ptA - Vec3( 0, 0, 0.1f ) );
+			bounds.Expand( ptA + Vec3( 0, 0, 2 ) );
+		}
+		s_navmeshBounds.push_back( bounds );
+	}
+
+	// Debug print the adjacency matrix
+	printf( "Adjacency Matrix: %i\n", N );
+	for ( int j = 0; j < N; j++ ) {
+		printf( "%i: ", j );
+		for ( int i = 0; i < N; i++ ) {
+			int val = (int)g_navAdjacencyMatrix.rows[ i ][ j ];
+			printf( " %i", val );
+		}
+		printf( "\n" );
+	}
+
+	// Debug print the adjacency matrix
+	printf( "Edge List Matrix: %i\n", N );
+	for ( int j = 0; j < N; j++ ) {
+		printf( "%i: ", j );
+		for ( int i = 0; i < N; i++ ) {
+			int val = (int)g_navEdgeListMatrix.rows[ i ][ j ];
+			printf( " %i", val + 1 );
+		}
+		printf( "\n" );
+	}
+
+	printf( "Num Edges: %i\n", s_navmeshEdges.size() );
+
+
+	//
+	//	Build render geo
+	//
+	// Build render geo
+	s_navmeshVerts.clear();
+	s_navmeshIndices.clear();
+	for ( int i = 0; i < s_navWindings.size(); i++ ) {
+		const winding_t & winding = s_navWindings[ i ];
+
+		const int numVerts = s_navmeshVerts.size();
+		for ( int j = 0; j < winding.pts.size(); j++ ) {
+			vert_t vert;
+			vert.pos = winding.pts[ j ];
+			vert.pos.z += 0.01f;
+			vert.st = Vec2( 0, 0 );
+			Vec3ToByte4_n11( vert.norm, Vec3( 0, 0, 1 ) );
+			Vec3ToByte4_n11( vert.tang, Vec3( 1, 0, 0 ) );
+			Vec3ToByte4_n11( vert.buff, Vec3( 0.5f, 0.5f, 1.0f ) );
+			s_navmeshVerts.push_back( vert );
+
+			if ( j > 0 ) {
+				s_navmeshIndices.push_back( numVerts + 0 );
+				s_navmeshIndices.push_back( numVerts + j );
+				s_navmeshIndices.push_back( numVerts + ( ( j + 1 ) % winding.pts.size() ) );
+			}
+		}		
+	}
+	BuildNavMeshRenderGeo();
+
+	// Write the nav mesh file
+	WriteNavFile();
+}
+
 /*
 ================================
 LoadNavMesh
@@ -117,6 +347,8 @@ void LoadNavMesh() {
 
 #if defined( USE_NAV_VOXELS )
 	BuildNavVoxels();
+	BuildWindingNavMesh();
+	return;
 
 	for ( int w = 0; w < s_navWindings.size(); w++ ) {
 		const winding_t & winding = s_navWindings[ w ];
@@ -406,20 +638,6 @@ void LoadNavMesh() {
 			vB[ 0 ] = triPoints[ b0 ];
 			vB[ 1 ] = triPoints[ b1 ];
 			vB[ 2 ] = triPoints[ b2 ];
-
-// 			float deltas[ 3 * 3 ];
-// 			deltas[ 0 ] = ( vB0 - vA0 ).GetMagnitude();
-// 			deltas[ 1 ] = ( vB0 - vA1 ).GetMagnitude();
-// 			deltas[ 2 ] = ( vB0 - vA2 ).GetMagnitude();
-// 
-// 			deltas[ 3 ] = ( vB1 - vA0 ).GetMagnitude();
-// 			deltas[ 4 ] = ( vB1 - vA1 ).GetMagnitude();
-// 			deltas[ 5 ] = ( vB1 - vA2 ).GetMagnitude();
-// 
-// 			deltas[ 6 ] = ( vB2 - vA0 ).GetMagnitude();
-// 			deltas[ 7 ] = ( vB2 - vA1 ).GetMagnitude();
-// 			deltas[ 8 ] = ( vB2 - vA2 ).GetMagnitude();
-
 			
 			bool isShared = false;
 			const int idx = s_navmeshEdges.size();
@@ -537,60 +755,70 @@ void DrawNavMesh() {
 }
 
 
-int GetTriangleIndex( Vec3 pt ) {
-	for ( int i = 0; i < s_navmeshBounds.size(); i++ ) {
-		const Bounds & bounds = s_navmeshBounds[ i ];
-		if ( !bounds.DoesIntersect( pt ) ) {
-			continue;
-		}
+// int GetTriangleIndex( Vec3 pt ) {
+// 	for ( int i = 0; i < s_navmeshBounds.size(); i++ ) {
+// 		const Bounds & bounds = s_navmeshBounds[ i ];
+// 		if ( !bounds.DoesIntersect( pt ) ) {
+// 			continue;
+// 		}
+// 
+// 		int idx0 = s_navmeshIndices[ 3 * i + 0 ];
+// 		int idx1 = s_navmeshIndices[ 3 * i + 1 ];
+// 		int idx2 = s_navmeshIndices[ 3 * i + 2 ];
+// 
+// 		const Vec3 & a = s_navmeshVerts[ idx0 ].pos;
+// 		const Vec3 & b = s_navmeshVerts[ idx1 ].pos;
+// 		const Vec3 & c = s_navmeshVerts[ idx2 ].pos;
+// 
+// 		Vec3 norm = ( b - a ).Cross( c - a );
+// 		norm.Normalize();
+// 
+// 		Vec3 ap = pt - a;
+// 		Vec3 p = pt - norm * ap.Dot( norm );
+// 		
+// 		float areaC = ( a - p ).Cross( b - p ).Dot( norm );
+// 		float areaA = ( b - p ).Cross( c - p ).Dot( norm );
+// 		float areaB = ( c - p ).Cross( a - p ).Dot( norm );
+// 		if ( areaA < 0 || areaB < 0 || areaC < 0 ) {
+// 			continue;
+// 		}
+// 
+// 		return i;
+// 	}
+// 	return -1;
+// }
+extern int GetNodeIndex( Vec3 pt );
 
-		int idx0 = s_navmeshIndices[ 3 * i + 0 ];
-		int idx1 = s_navmeshIndices[ 3 * i + 1 ];
-		int idx2 = s_navmeshIndices[ 3 * i + 2 ];
-
-		const Vec3 & a = s_navmeshVerts[ idx0 ].pos;
-		const Vec3 & b = s_navmeshVerts[ idx1 ].pos;
-		const Vec3 & c = s_navmeshVerts[ idx2 ].pos;
-
-		Vec3 norm = ( b - a ).Cross( c - a );
-		norm.Normalize();
-
-		Vec3 ap = pt - a;
-		Vec3 p = pt - norm * ap.Dot( norm );
-		
-		float areaC = ( a - p ).Cross( b - p ).Dot( norm );
-		float areaA = ( b - p ).Cross( c - p ).Dot( norm );
-		float areaB = ( c - p ).Cross( a - p ).Dot( norm );
-		if ( areaA < 0 || areaB < 0 || areaC < 0 ) {
-			continue;
-		}
-
-		return i;
-	}
-	return -1;
-}
-
-
-void DrawNavMeshTriangle( Vec3 pt, Shader * shader ) {
-	int tri = GetTriangleIndex( pt );
-	if ( -1 == tri ) {
+//std::vector< vert_t > s_debugVerts;
+void DrawNavMeshNode( Vec3 pt, Shader * shader ) {
+	int idx = GetNodeIndex( pt );
+	if ( -1 == idx ) {
 		return;
 	}
 
-	int a = s_navmeshIndices[ tri * 3 + 0 ];
-	int b = s_navmeshIndices[ tri * 3 + 1 ];
-	int c = s_navmeshIndices[ tri * 3 + 2 ];
+	const winding_t & winding = s_navWindings[ idx ];
 
-	vert_t verts[ 3 ];
-	verts[ 0 ] = s_navmeshVerts[ a ];
-	verts[ 1 ] = s_navmeshVerts[ b ];
-	verts[ 2 ] = s_navmeshVerts[ c ];
+	int vertOffset = 0;
+	int indexOffset = 0;
+	for ( int i = 0; i < idx; i++ ) {
+		const winding_t & winding = s_navWindings[ i ];
+		vertOffset += winding.pts.size();
+		indexOffset += ( winding.pts.size() - 2 ) * 3;
+	}
+	int numIndices = ( winding.pts.size() - 2 ) * 3;
 
-	verts[ 0 ].pos.z += 0.02f;
-	verts[ 1 ].pos.z += 0.02f;
-	verts[ 2 ].pos.z += 0.02f;
-
-	int indices[ 3 ] = { 0, 1, 2 };
+	vert_t * verts = (vert_t *)alloca( sizeof( vert_t ) * winding.pts.size() );
+	for ( int i = 0; i < winding.pts.size(); i++ ) {
+		verts[ i ] = s_navmeshVerts[ vertOffset + i ];
+	}
+	//verts = s_navmeshVerts.data() + vertOffset;
+	int * indices = (int *)alloca( sizeof( int ) * numIndices );
+	for ( int i = 1; i < winding.pts.size() - 1; i++ ) {
+		int idx = i - 1;
+		indices[ 3 * idx + 0 ] = 0;
+		indices[ 3 * idx + 1 ] = i;
+		indices[ 3 * idx + 2 ] = i + 1;
+	}
 
 	// Update attribute values.
 	const int stride = sizeof( vert_t );
@@ -602,13 +830,55 @@ void DrawNavMeshTriangle( Vec3 pt, Shader * shader ) {
 // 	shader->SetVertexAttribPointer( "color", 4, GL_UNSIGNED_BYTE, 0, stride, verts[ 0 ].buff );
 
 	// Draw
-	//const int num = indices.size();
-	glDrawElements( GL_TRIANGLES, 3, GL_UNSIGNED_INT, indices );
+	glDrawElements( GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, indices );
 }
 
+void DrawNavMeshEdges( Shader * shader ) {
+	vert_t vert;
+	vert.st = Vec2( 0, 0 );
+	Vec3ToByte4_n11( vert.norm, Vec3( 0, 0, 1 ) );
+	Vec3ToByte4_n11( vert.tang, Vec3( 1, 0, 0 ) );
+	Vec3ToByte4_n11( vert.buff, Vec3( 0.5f, 0.5f, 1.0f ) );
+
+
+	vert_t * verts = (vert_t *)alloca( sizeof( vert_t ) * s_navmeshEdges.size() * 2 );
+	for ( int i = 0; i < s_navmeshEdges.size(); i++ ) {
+		const navEdge_t & edge = s_navmeshEdges[ i ];
+
+		vert.pos = edge.a + Vec3( 0, 0, 0.2f );
+		verts[ 2 * i + 0 ] = vert;
+
+		vert.pos = edge.b + Vec3( 0, 0, 0.2f );
+		verts[ 2 * i + 1 ] = vert;
+	}
+	
+	const int numIndices = s_navmeshEdges.size() * 2;
+	int * indices = (int *)alloca( sizeof( int ) * numIndices );
+	for ( int i = 0; i < s_navmeshEdges.size(); i++ ) {
+		indices[ 2 * i + 0 ] = 2 * i + 0;
+		indices[ 2 * i + 1 ] = 2 * i + 1;
+	}
+
+	// Update attribute values.
+	const int stride = sizeof( vert_t );
+	shader->SetVertexAttribPointer( "position", 3, GL_FLOAT, 0, stride, verts );
+//	shader->SetVertexAttribPointer( "position", 3, GL_FLOAT, 0, stride, verts[ 0 ].pos.ToPtr() );
+//	shader->SetVertexAttribPointer( "st", 2, GL_FLOAT, 0, stride, verts[ 0 ].st.ToPtr() );
+//	shader->SetVertexAttribPointer( "normal", 4, GL_UNSIGNED_BYTE, 0, stride, verts[ 0 ].norm );
+// 	shader->SetVertexAttribPointer( "tangent", 4, GL_UNSIGNED_BYTE, 0, stride, verts[ 0 ].tang );
+// 	shader->SetVertexAttribPointer( "color", 4, GL_UNSIGNED_BYTE, 0, stride, verts[ 0 ].buff );
+
+	glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+	glLineWidth( 5.0f );
+
+	// Draw
+	glDrawElements( GL_LINES, numIndices, GL_UNSIGNED_INT, indices );
+
+	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+}
 
 int GetTriangleNeighborIndices( const Vec3 & pt, int * tris ) {
-	int idx = GetTriangleIndex( pt );
+	int idx = GetNodeIndex( pt );
 	if ( -1 == idx ) {
 		return 0;
 	}

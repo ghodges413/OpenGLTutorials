@@ -451,16 +451,19 @@ void DrawFrame( void ) {
 		shader->SetUniform4f( "color", 1, color.ToPtr() );
 		
 		DrawNavMesh();
-
+#if 1
 		// Draw the player's occupied navmesh node
 		color = Vec4( 0.0, 1.0, 0.0, 0.5 );
 		shader->SetUniform4f( "color", 1, color.ToPtr() );
-		DrawNavMeshTriangle( g_playerBody->m_position, shader );
+		DrawNavMeshNode( g_playerBody->m_position, shader );
+
+		// Draw the NaveMeshEdges
+		DrawNavMeshEdges( shader );
 
 		// Draw the start of the navmesh's pathfinding
 		color = Vec4( 1.0, 0.0, 0.0, 0.5 );
 		shader->SetUniform4f( "color", 1, color.ToPtr() );
-		DrawNavMeshTriangle( g_navStart, shader );
+		DrawNavMeshNode( g_navStart, shader );
 
 		// Draw the player's neighboring navmesh nodes
 		color = Vec4( 1.0, 1.0, 0.0, 0.5 );
@@ -471,9 +474,9 @@ void DrawFrame( void ) {
 		extern std::vector< Vec3 > g_finalPathPoints;
 		for ( int i = 1; i < ( (int)g_finalPathPoints.size() - 1 ); i++ ) {
 			Vec3 point = g_finalPathPoints[ i ];
-			DrawNavMeshTriangle( point, shader );
+			DrawNavMeshNode( point, shader );
 		}
-
+#endif
 		// Draw the navmesh node outlines
 		glDisable( GL_BLEND );
 

@@ -15,16 +15,6 @@
 #include <assert.h>
 #include <vector>
 
-// std::vector< vert_t > s_navmeshVerts;
-// std::vector< int > s_navmeshIndices;
-// std::vector< Bounds > s_navmeshBounds;
-// 
-// static VertexBufferObject s_navmeshVBO;
-// static VertexArrayObject s_navmeshVAO;
-// static VertexBufferObject s_navmeshIBO;
-// 
-// MatN g_navAdjacencyMatrix;
-
 extern MatN g_navAdjacencyMatrix;
 extern MatN g_navEdgeListMatrix;
 
@@ -32,6 +22,7 @@ extern std::vector< vert_t > s_navmeshVerts;
 extern std::vector< int > s_navmeshIndices;
 extern std::vector< Bounds > s_navmeshBounds;
 extern std::vector< navEdge_t > s_navmeshEdges;
+extern std::vector< winding_t > s_navWindings;
 
 extern void BuildNavMeshRenderGeo();
 
@@ -44,7 +35,7 @@ NavFile
 */
 
 #define NAV_FILE_MAGIC 4829
-#define NAV_FILE_VERSION 1
+#define NAV_FILE_VERSION 2
 
 struct navHeader_t {
 	int magic;
@@ -54,6 +45,7 @@ struct navHeader_t {
 	int numIndices;
 	int numBounds;
 	int numEdges;
+	int numWindings;
 };
 
 /*
@@ -127,6 +119,25 @@ bool ReadNavFile() {
 		data_ptr += sizeof( edge );
 	}
 
+	winding_t winding;
+	s_navWindings.clear();
+	for ( int i = 0; i < header.numWindings; i++ ) {
+		int num = 0;
+		memcpy( &num, data_ptr, sizeof( int ) );
+		data_ptr += sizeof( int );
+
+		winding.pts.clear();
+		for ( int j = 0; j < num; j++ ) {
+			Vec3 pt;
+			memcpy( &pt, data_ptr, sizeof( pt ) );
+			data_ptr += sizeof( pt );
+
+			winding.pts.push_back( pt );
+		}
+
+		s_navWindings.push_back( winding );
+	}
+
 	BuildNavMeshRenderGeo();
 	
 	free( data );
@@ -151,6 +162,7 @@ bool WriteNavFile() {
 	header.numIndices = s_navmeshIndices.size();
 	header.numBounds = s_navmeshBounds.size();
 	header.numEdges = s_navmeshEdges.size();
+	header.numWindings = s_navWindings.size();
 	WriteFileStream( &header, sizeof( header ) );
 
 	for ( int i = 0; i < header.matDim; i++ ) {
@@ -164,6 +176,13 @@ bool WriteNavFile() {
 	WriteFileStream( s_navmeshIndices.data(), sizeof( int ) * s_navmeshIndices.size() );
 	WriteFileStream( s_navmeshBounds.data(), sizeof( Bounds ) * s_navmeshBounds.size() );
 	WriteFileStream( s_navmeshEdges.data(), sizeof( navEdge_t ) * s_navmeshEdges.size() );
+
+	for ( int i = 0; i < s_navWindings.size(); i++ ) {
+		const winding_t & winding = s_navWindings[ i ];
+		int num = winding.pts.size();
+		WriteFileStream( &num, sizeof( int ) );
+		WriteFileStream( winding.pts.data(), sizeof( Vec3 ) * num );
+	}
 
 	CloseFileWriteStream();
 	return true;
