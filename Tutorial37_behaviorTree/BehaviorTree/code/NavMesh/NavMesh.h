@@ -18,6 +18,5 @@ void LoadNavMesh();
 void DrawNavMesh();
 void DrawNavMeshEdges( Shader * shader );
 void DrawNavMeshNode( Vec3 pt, Shader * shader );
-void DrawNavMeshNeighborTriangle( Vec3 pt, Shader * shader );
 
 

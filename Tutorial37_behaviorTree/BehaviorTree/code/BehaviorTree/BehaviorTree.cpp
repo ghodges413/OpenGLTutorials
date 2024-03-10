@@ -165,7 +165,7 @@ BuildBehaviorTree
 ================================
 */
 void BuildBehaviorTree() {
-	// TODO: We will build our basic behavior tree here
+	// We will build our basic behavior tree here
 	s_root = (btNode_t *)malloc( sizeof( btNode_t ) );
 	s_root->action = SpiderRoot;
 	s_root->state = BT_RUNNING;
