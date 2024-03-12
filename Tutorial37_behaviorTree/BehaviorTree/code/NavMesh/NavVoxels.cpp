@@ -197,8 +197,9 @@ void BuildByVoxelizingBrushes() {
 	//	So copy only the top voxels into the final voxel list
 	//
 	for ( int i = 0; i < s_navVoxelsRaw.size(); i++ ) {
-		navVoxel_t voxel = s_navVoxelsRaw[ i ];
+		navVoxel_t & voxel = s_navVoxelsRaw[ i ];
 
+		// Check for Top Voxel
 		bool isTopVoxel = true;
 		for ( int j = 0; j < s_navVoxelsRaw.size(); j++ ) {
 			if ( i == j ) {
@@ -222,8 +223,70 @@ void BuildByVoxelizingBrushes() {
 		}
 	}
 
+	printf( "Collaspe Stack Voxels:\n" );
 	printf( "Raw   Voxels: %i\n", s_navVoxelsRaw.size() );
 	printf( "Final Voxels: %i\n", s_navVoxels.size() );
+
+	
+	//
+	//	Voxels that are too close to an edge also need to be removed.
+	// 	Check the 8 neighboring voxel distances for geometry underneath
+	//
+	s_navVoxelsRaw = s_navVoxels;
+	s_navVoxels.clear();
+	for ( int i = 0; i < s_navVoxelsRaw.size(); i++ ) {
+		navVoxel_t voxel = s_navVoxelsRaw[ i ];
+
+		bool isEdge = false;
+		for ( int y = -1; y < 2; y++ ) {
+			for ( int x = -1; x < 2; x++ ) {
+				if ( x == 0 && y == 0 ) {
+					continue;
+				}
+
+				Vec3 offset = Vec3( float( x ) * VOXEL_RES, float( y ) * VOXEL_RES, 0 );
+				Vec3 testPt = voxel.pos + offset;
+				Vec3 testPt2 = testPt + Vec3( 0, 0, -VOXEL_RES );
+				Vec3 testPt3 = testPt2 + Vec3( 0, 0, -VOXEL_RES );
+
+				bool hasIntersection = false;
+				for ( int b = 0; b < g_brushes.size(); b++ ) {
+					const brush_t & brush = g_brushes[ b ];
+					if ( IsPointInBrush( brush, testPt ) ) {
+						hasIntersection = true;
+						break;
+					}
+					if ( IsPointInBrush( brush, testPt2 ) ) {
+						hasIntersection = true;
+						break;
+					}
+					if ( IsPointInBrush( brush, testPt3 ) ) {
+						hasIntersection = true;
+						break;
+					}
+				}
+
+				if ( !hasIntersection ) {
+					isEdge = true;
+					break;
+				}
+			}
+			if ( isEdge ) {
+				break;
+			}
+		}
+
+		if ( isEdge ) {
+			continue;
+		}
+
+		s_navVoxels.push_back( voxel );
+	}
+
+	printf( "Edge removal Voxels:\n" );
+	printf( "Raw   Voxels: %i\n", s_navVoxelsRaw.size() );
+	printf( "Final Voxels: %i\n", s_navVoxels.size() );
+	
 
 	//
 	//	With the top voxels, we want to project them onto the brushes beneath them.
