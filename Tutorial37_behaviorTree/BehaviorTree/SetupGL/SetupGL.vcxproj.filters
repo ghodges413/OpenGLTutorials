@@ -286,6 +286,12 @@
     <ClCompile Include="..\code\Animation\AnimMatrix.cpp">
       <Filter>code\Animation</Filter>
     </ClCompile>
+    <ClCompile Include="..\code\BehaviorTree\BehaviorTreeNodes.cpp">
+      <Filter>code\BehaviorTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\BehaviorTree\BehaviorTreeFile.cpp">
+      <Filter>code\BehaviorTree</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\code\Math\Bounds.h">
@@ -542,6 +548,12 @@
     </ClInclude>
     <ClInclude Include="..\code\Animation\AnimMatrix.h">
       <Filter>code\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\BehaviorTree\BehaviorTreeNodes.h">
+      <Filter>code\BehaviorTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\BehaviorTree\BehaviorTreeFile.h">
+      <Filter>code\BehaviorTree</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

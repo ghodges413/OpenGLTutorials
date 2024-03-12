@@ -1,0 +1,9 @@
+
+
+"SpiderRoot" {
+	"WalkToPlayer" {
+		"GetPlayerPos"
+		"WalkToPosition"
+	}
+	"Idle"
+}

@@ -282,7 +282,7 @@ void LoadNavMesh() {
 	}
 
 	//
-	//	Build the bounds for each triangle
+	//	Build the bounds for each winding
 	//
 	for ( int i = 0; i < s_navWindings.size(); i++ ) {
 		const winding_t & winding = s_navWindings[ i ];

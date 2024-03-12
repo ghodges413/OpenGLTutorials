@@ -1,50 +1,7 @@
 //
-//  BehaviorTree.h
+//  BehaviorTreeNodes.h
 //
 #pragma once
-#include "BehaviorTree/BehaviorTreeNodes.h"
-#include "Math/Vector.h"
-
-struct btNode_t;
-
-void BuildBehaviorTree();
-void CleanUpTree();
-void TickTree();
-
-// enum btState_t {
-// 	BT_READY = 0,	// Not currently running, but can be run (we may not need this state)
-// 	BT_SUCCESS,
-// 	BT_FAILURE,
-// 	BT_RUNNING,
-// };
-
-
-
-typedef btState_t action_t( struct btNode_t * thisNode );	// Function type for the node
-
-struct btNode_t {
-	char name[ 64 ];
-
-	action_t * action;	// Function pointer for the node
-	btState_t state;	// We probably don't need to store the state on the node (actually, we probably do)
-
-	btNode_t * children;
-	int numChildren;
-
-	Vec3 data;	// This is the player position... the reality is OOP is probably the easiest way to write a behavior tree
-};
-
-// class BTNodeBase {
-// public:
-// 	BTNodeBase() { m_children = NULL; m_numChildren = 0; }
-// 	~BTNodeBase() {}
-// 
-// 	virtual void Action() = 0;
-// 	btState_t m_state;
-// 
-// 	BTNodeBase ** m_children;
-// 	int m_numChildren;
-// };
 
 
 // Types of nodes:
@@ -77,3 +34,41 @@ struct btNode_t {
 // path back to navmesh (this assumes the thing got knocked off the navmesh.. it should die if it can't walk back)
 // die
 
+
+enum btState_t {
+	BT_READY = 0,	// Not currently running, but can be run (we may not need this state)
+	BT_SUCCESS,
+	BT_FAILURE,
+	BT_RUNNING,
+};
+
+struct btNode_t;
+
+btState_t SpiderRoot( btNode_t * thisNode );
+btState_t Idle( btNode_t * thisNode );
+btState_t WalkToPlayer( btNode_t * thisNode );
+btState_t Sequence( btNode_t * thisNode );
+btState_t Selector( btNode_t * thisNode );
+btState_t GetPlayerPos( btNode_t * thisNode );
+btState_t WalkToPosition( btNode_t * thisNode );
+
+
+
+class BTNodeBase {
+public:
+	BTNodeBase() {}//{ m_children = NULL; m_numChildren = 0; }
+	~BTNodeBase() {}
+
+	virtual void Action() = 0;
+	btState_t m_state;
+
+	BTNodeBase ** m_children;
+	int m_numChildren;
+};
+
+class BTNodeSpiderRoot : public BTNodeBase {
+public:
+	BTNodeSpiderRoot() : BTNodeBase() {}
+
+	virtual void Action();
+};

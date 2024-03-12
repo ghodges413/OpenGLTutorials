@@ -24,7 +24,7 @@ bool MD5Model::Load( const char * fileName ) {
 	mMeshes.Clear();
 
 	char fullPath[ 2048 ];
-	RelativePathToFullPath( fileName, fullPath );	
+	RelativePathToFullPath( fileName, fullPath );
 	
 	FILE * fp = fopen( fullPath, "rb" );
 	if ( !fp ) {

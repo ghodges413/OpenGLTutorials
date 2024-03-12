@@ -148,6 +148,8 @@ xcopy /y $(SolutionDir)libs\glew-1.10.0\bin\Release\x64\glew32.dll $(SolutionDir
     <ClCompile Include="..\code\Animation\MD5Anim.cpp" />
     <ClCompile Include="..\code\Animation\MD5Model.cpp" />
     <ClCompile Include="..\code\BehaviorTree\BehaviorTree.cpp" />
+    <ClCompile Include="..\code\BehaviorTree\BehaviorTreeFile.cpp" />
+    <ClCompile Include="..\code\BehaviorTree\BehaviorTreeNodes.cpp" />
     <ClCompile Include="..\code\BSP\Brush.cpp" />
     <ClCompile Include="..\code\BSP\BSP.cpp" />
     <ClCompile Include="..\code\BSP\Map.cpp" />
@@ -230,6 +232,8 @@ xcopy /y $(SolutionDir)libs\glew-1.10.0\bin\Release\x64\glew32.dll $(SolutionDir
     <ClInclude Include="..\code\Animation\MD5Anim.h" />
     <ClInclude Include="..\code\Animation\MD5Model.h" />
     <ClInclude Include="..\code\BehaviorTree\BehaviorTree.h" />
+    <ClInclude Include="..\code\BehaviorTree\BehaviorTreeFile.h" />
+    <ClInclude Include="..\code\BehaviorTree\BehaviorTreeNodes.h" />
     <ClInclude Include="..\code\BSP\Brush.h" />
     <ClInclude Include="..\code\BSP\BSP.h" />
     <ClInclude Include="..\code\BSP\Map.h" />

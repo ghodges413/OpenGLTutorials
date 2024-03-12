@@ -1,9 +1,8 @@
 //
 //  BehaviorTree.cpp
 //
-#include "NavMesh/PathFinding.h"
+#include "BehaviorTree/BehaviorTreeNodes.h"
 #include "BehaviorTree/BehaviorTree.h"
-#include "BehaviorTree/BehaviorTreeFile.h"
 #include "Entities/Player.h"
 #include "Entities/Spider.h"
 #include <math.h>
@@ -15,9 +14,9 @@
 extern Player g_player;
 extern Spider g_spider;
 
-static btNode_t * s_root = NULL;
-
-static std::vector< btNode_t * > s_nodeStack; // The stack of currently active nodes (so that we don't have to parse the tree each frame, we can just call the top of the stack)
+static BTNodeBase * s_root = NULL;
+#if 0
+//static std::vector< btNode_t * > s_nodeStack; // The stack of currently active nodes (so that we don't have to parse the tree each frame, we can just call the top of the stack)
 
 // Let's start with pathing to the player.
 // Node ( find next point to walk to ) -> Node ( walk to point )
@@ -26,7 +25,7 @@ static std::vector< btNode_t * > s_nodeStack; // The stack of currently active n
 
 btState_t SpiderRoot( btNode_t * thisNode ) {
 	// This is a selector node
-	// 1. WalkToPlayer
+	// 1. WalktToPlayer
 	// if it fails then
 	// 2. Idle
 	btState_t state = thisNode->children[ 0 ].action( thisNode->children + 0 );
@@ -44,10 +43,10 @@ btState_t Idle( btNode_t * thisNode ) {
 }
 
 btState_t WalkToPlayer( btNode_t * thisNode ) {
-	// Get the player's position
-	// Use the navmesh to find the shortest path to the player
-	// Grab the position in the navmesh to the next node
-	// Animate towards there
+	// TODO: Get the player's position
+	//		Use the navmesh to find the shortest path to the player
+	//		Grab the position in the navmesh to the next node
+	//		Animate towards there
 	if ( BT_SUCCESS == thisNode->children[ 0 ].action( thisNode->children + 0 ) ) {
 		thisNode->data = thisNode->children[ 0 ].data;
 		thisNode->children[ 1 ].data = thisNode->data;
@@ -62,28 +61,6 @@ btState_t WalkToPlayer( btNode_t * thisNode ) {
 			return BT_RUNNING;
 		}
 	}
-	return BT_FAILURE;
-}
-
-btState_t Sequence( btNode_t * thisNode ) {
-	for ( int i = 0; i < thisNode->numChildren; i++ ) {
-		btNode_t * child = thisNode->children + i;
-		if ( BT_FAILURE == child->action( child ) ) {
-			return BT_FAILURE;
-		}
-	}
-
-	return BT_SUCCESS;
-}
-
-btState_t Selector( btNode_t * thisNode ) {
-	for ( int i = 0; i < thisNode->numChildren; i++ ) {
-		btNode_t * child = thisNode->children + i;
-		if ( BT_SUCCESS == child->action( child ) ) {
-			return BT_SUCCESS;
-		}
-	}
-
 	return BT_FAILURE;
 }
 
@@ -189,16 +166,14 @@ BuildBehaviorTree
 */
 void BuildBehaviorTree() {
 	// We will build our basic behavior tree here
-// 	s_root = (btNode_t *)malloc( sizeof( btNode_t ) );
-// 	s_root->action = SpiderRoot;
-// 	s_root->state = BT_RUNNING;
-// 	s_root->numChildren = 2;
-// 	s_root->children = (btNode_t *)malloc( sizeof( btNode_t ) * 2 );
-// 
-// 	BuildWalkToPlayer( s_root->children + 0 );
-// 	BuildIdleNode( s_root->children + 1 );
+	s_root = (btNode_t *)malloc( sizeof( btNode_t ) );
+	s_root->action = SpiderRoot;
+	s_root->state = BT_RUNNING;
+	s_root->numChildren = 2;
+	s_root->children = (btNode_t *)malloc( sizeof( btNode_t ) * 2 );
 
-	s_root = ReadBehaviorTreeFile( "data/BehaviorTrees/spider.btree" );
+	BuildWalkToPlayer( s_root->children + 0 );
+	BuildIdleNode( s_root->children + 1 );
 }
 
 void DeleteTree_r( btNode_t * node ) {
@@ -243,3 +218,4 @@ void TickTree() {
 }
 
 
+#endif
