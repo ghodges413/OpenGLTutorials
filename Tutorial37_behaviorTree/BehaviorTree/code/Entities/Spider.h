@@ -50,8 +50,6 @@ public:
 	MD5Model    mModel;
     MD5Anim     mAnimIdle;
 	MD5Anim     mAnimWalk;
-	MD5Anim		mAnimAttack;
-	MD5Anim		mAnimPain;
 
 	bool mIsAttacking;
 	bool mIsWalking;
@@ -60,6 +58,7 @@ public:
 	const md5Skeleton_t *	mSkeleton;
 
 	aiState_t m_state;
+	int m_health;
 };
 
 

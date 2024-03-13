@@ -19,9 +19,11 @@ static btNode_t * s_root = NULL;
 
 static std::vector< btNode_t * > s_nodeStack; // The stack of currently active nodes (so that we don't have to parse the tree each frame, we can just call the top of the stack)
 
-// Let's start with pathing to the player.
-// Node ( find next point to walk to ) -> Node ( walk to point )
-// Repeat this action until having reached player position
+// There's a lot to do to improve the behavior tree.
+// A blackboard could be used for communication between nodes.
+// A stack of nodes could be used to optimize ticks (we wouldn't 
+// have to parse the whole tree each frame to run a currently running node).
+// OOP could clearly be used to create different nodes.
 
 
 btState_t SpiderRoot( btNode_t * thisNode ) {
@@ -29,11 +31,17 @@ btState_t SpiderRoot( btNode_t * thisNode ) {
 	// 1. WalkToPlayer
 	// if it fails then
 	// 2. Idle
-	btState_t state = thisNode->children[ 0 ].action( thisNode->children + 0 );
+	btState_t state;
+	if ( g_spider.m_health < 10 ) {
+		state = thisNode->children[ 1 ].action( thisNode->children + 1 );
+	} else {
+		state = thisNode->children[ 0 ].action( thisNode->children + 0 );
+	}
+
 	if ( BT_RUNNING == state ) {
 		return BT_RUNNING;
 	} else {
-		thisNode->children[ 1 ].action( thisNode->children + 1 );
+		thisNode->children[ 2 ].action( thisNode->children + 1 );
 	}
 	return BT_RUNNING;
 }
@@ -65,6 +73,25 @@ btState_t WalkToPlayer( btNode_t * thisNode ) {
 	return BT_FAILURE;
 }
 
+btState_t EatFood( btNode_t * thisNode ) {
+	if ( BT_SUCCESS == thisNode->children[ 0 ].action( thisNode->children + 0 ) ) {
+		thisNode->data = thisNode->children[ 0 ].data;
+		thisNode->children[ 1 ].data = thisNode->data;
+		btState_t state = thisNode->children[ 1 ].action( thisNode->children + 1 );
+		if ( BT_FAILURE == state ) {
+			return BT_FAILURE;
+		}
+		if ( BT_SUCCESS == state ) {
+			state = thisNode->children[ 2 ].action( thisNode->children + 2 );
+			return state;
+		}
+		if ( BT_RUNNING == state ) {
+			return BT_RUNNING;
+		}
+	}
+	return BT_FAILURE;
+}
+
 btState_t Sequence( btNode_t * thisNode ) {
 	for ( int i = 0; i < thisNode->numChildren; i++ ) {
 		btNode_t * child = thisNode->children + i;
@@ -88,7 +115,17 @@ btState_t Selector( btNode_t * thisNode ) {
 }
 
 btState_t GetPlayerPos( btNode_t * thisNode ) {
-	thisNode->data = g_player.GetPosition();
+	thisNode->data = g_player.GetPosition() - Vec3( 0, 0, 0.5f );
+	return BT_SUCCESS;
+}
+
+btState_t GetFoodPos( btNode_t * thisNode ) {
+	thisNode->data = Vec3( 0, 0, 0 );
+	return BT_SUCCESS;
+}
+
+btState_t Eat( btNode_t * thisNode ) {
+	g_spider.m_health = 100;
 	return BT_SUCCESS;
 }
 

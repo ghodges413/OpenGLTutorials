@@ -17,6 +17,7 @@ extern Player g_player;
 Spider::Spider() : mSphere( Spider::sRadius ) {
 	mLookDir = Vec3( 1, 0, 0 );
 	mPosition = Vec3( 10, 0, 0 );
+	m_health = 100;
 }
 
 /*
@@ -30,8 +31,6 @@ void Spider::Load() {
 
     mAnimIdle.Load( "../../common/animation/alert_idle.md5anim" );
 	mAnimWalk.Load( "../../common/animation/walk1.md5anim" );
-    mAnimAttack.Load( "../../common/animation/melee1.md5anim" );
-    mAnimPain.Load( "../../common/animation/evade_left.md5anim" );
 }
 
 std::vector< Vec3 > g_pathPts;
@@ -107,7 +106,10 @@ void Spider::UpdateBT( const float dt_ms ) {
 void Spider::Update( const float dt_ms ) {
 	UpdateBT( dt_ms );
 
-
+	Vec3 rayToPlayer = g_player.GetPosition() - mPosition;
+	if ( rayToPlayer.GetMagnitude() < 2.0f ) {
+		--m_health;
+	}
 #if 0
 	// Move the Spider and collide with the scene
 	const Vec3 velocity( 0, 0, -1 );

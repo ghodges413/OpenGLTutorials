@@ -129,6 +129,15 @@ action_t * GetActionFromName( const char * name ) {
 	if ( 0 == strcmp( name, "WalkToPosition" ) ) {
 		return WalkToPosition;
 	}
+	if ( 0 == strcmp( name, "EatFood" ) ) {
+		return EatFood;
+	}
+	if ( 0 == strcmp( name, "GetFoodPos" ) ) {
+		return GetFoodPos;
+	}
+	if ( 0 == strcmp( name, "Eat" ) ) {
+		return Eat;
+	}
 
 	assert( false );
 	return NULL;	// This shouldn't happen

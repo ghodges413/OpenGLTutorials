@@ -51,6 +51,9 @@ btState_t Sequence( btNode_t * thisNode );
 btState_t Selector( btNode_t * thisNode );
 btState_t GetPlayerPos( btNode_t * thisNode );
 btState_t WalkToPosition( btNode_t * thisNode );
+btState_t EatFood( btNode_t * thisNode );
+btState_t GetFoodPos( btNode_t * thisNode );
+btState_t Eat( btNode_t * thisNode );
 
 
 

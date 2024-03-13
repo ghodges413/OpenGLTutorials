@@ -5,5 +5,10 @@
 		"GetPlayerPos"
 		"WalkToPosition"
 	}
+	"EatFood" {
+		"GetFoodPos"
+		"WalkToPosition"
+		"Eat"
+	}
 	"Idle"
 }
