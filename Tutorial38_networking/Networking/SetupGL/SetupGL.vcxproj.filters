@@ -1,0 +1,553 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="code">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="code\Math">
+      <UniqueIdentifier>{9d3854e9-ed71-49a7-b4ce-d27f557a8731}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Graphics">
+      <UniqueIdentifier>{578766e6-9f00-412e-b800-dda0d470d496}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Miscellaneous">
+      <UniqueIdentifier>{c443f767-6ef5-42d5-acca-59b40483c403}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\BSP">
+      <UniqueIdentifier>{1e41f4c5-5104-47d1-ab54-b754c65846b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Physics">
+      <UniqueIdentifier>{a553d181-78cd-4807-a8a7-7b15bc32f3b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Physics\Shapes">
+      <UniqueIdentifier>{73884d90-5e9f-4dc2-959c-3fcd6cd576f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Physics\Constraints">
+      <UniqueIdentifier>{7c5f93b4-3b80-4bd1-8986-281318d92c7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Entities">
+      <UniqueIdentifier>{7047af3d-d845-45b7-bd7d-f028ff712d72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Threading">
+      <UniqueIdentifier>{ed708cfe-3eca-4cce-9ffa-c9386120bbb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\JobSystem">
+      <UniqueIdentifier>{e01be1a2-769e-46fa-808d-8dae9b5616bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\NavMesh">
+      <UniqueIdentifier>{585fe1a1-ff9b-4986-a36a-22ca29d72d92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Animation">
+      <UniqueIdentifier>{42b30bf8-ec26-4727-a297-31318d67190d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code\Networking">
+      <UniqueIdentifier>{60f94c8f-0c07-4b49-84a1-286790824bca}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\code\winmain.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Frustum.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Matrix.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\MatrixOps.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Vector.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Plane.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Graphics.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Mesh.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\RenderSurface.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Shader.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Targa.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\Texture.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\VertexArrayObject.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\VertexBufferObject.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\Fileio.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\Time.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Sphere.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\String.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\ShaderManager.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\TextureManager.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Fourier.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Math.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Quat.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Random.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Miscellaneous\Input.cpp">
+      <Filter>code\Miscellaneous</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Graphics\BlockCompression.cpp">
+      <Filter>code\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\BSP\Map.cpp">
+      <Filter>code\BSP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\BSP\Brush.cpp">
+      <Filter>code\BSP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\BSP\BSP.cpp">
+      <Filter>code\BSP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Body.cpp">
+      <Filter>code\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\BroadPhase.cpp">
+      <Filter>code\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\BVH.cpp">
+      <Filter>code\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Cloth.cpp">
+      <Filter>code\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Constraints.cpp">
+      <Filter>code\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Contact.cpp">
+      <Filter>code\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Intersections.cpp">
+      <Filter>code\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Manifold.cpp">
+      <Filter>code\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\PhysicsWorld.cpp">
+      <Filter>code\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Shapes.cpp">
+      <Filter>code\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Shapes\ShapeBase.cpp">
+      <Filter>code\Physics\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Shapes\ShapeBox.cpp">
+      <Filter>code\Physics\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Shapes\ShapeCapsule.cpp">
+      <Filter>code\Physics\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Shapes\ShapeConvex.cpp">
+      <Filter>code\Physics\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Shapes\ShapeSphere.cpp">
+      <Filter>code\Physics\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Constraints\ConstraintBase.cpp">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Constraints\ConstraintConstantVelocity.cpp">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Constraints\ConstraintDistance.cpp">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Constraints\ConstraintHinge.cpp">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Constraints\ConstraintManifold.cpp">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Constraints\ConstraintMotor.cpp">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Constraints\ConstraintOrientation.cpp">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Physics\Constraints\ConstraintPenetration.cpp">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Bounds.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\epa.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\gjk.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\IntersectionTests.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\lcp.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\MonteCarlo.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\Morton.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Math\SignedVolumes.cpp">
+      <Filter>code\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Entities\Entity.cpp">
+      <Filter>code\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Entities\Player.cpp">
+      <Filter>code\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Entities\Projectile.cpp">
+      <Filter>code\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Threading\Atomics.cpp">
+      <Filter>code\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Threading\Mutex.cpp">
+      <Filter>code\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Threading\ThreadLocks.cpp">
+      <Filter>code\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Threading\Threads.cpp">
+      <Filter>code\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\JobSystem\JobAllocators.cpp">
+      <Filter>code\JobSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\JobSystem\JobQueues.cpp">
+      <Filter>code\JobSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\JobSystem\JobSystem.cpp">
+      <Filter>code\JobSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\JobSystem\JobThread.cpp">
+      <Filter>code\JobSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\NavMesh\NavMesh.cpp">
+      <Filter>code\NavMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\NavMesh\PathFinding.cpp">
+      <Filter>code\NavMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\NavMesh\NavVoxels.cpp">
+      <Filter>code\NavMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\NavMesh\NavFile.cpp">
+      <Filter>code\NavMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Animation\MD5Anim.cpp">
+      <Filter>code\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Animation\MD5Model.cpp">
+      <Filter>code\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Animation\AnimMatrix.cpp">
+      <Filter>code\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Networking\Client.cpp">
+      <Filter>code\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Networking\Server.cpp">
+      <Filter>code\Networking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\Networking\Sockets.cpp">
+      <Filter>code\Networking</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\code\Math\Bounds.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Frustum.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Matrix.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\MatrixOps.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Vector.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Plane.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Graphics.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Mesh.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\RenderSurface.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Shader.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Targa.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\Texture.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\VertexArrayObject.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\VertexBufferObject.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Array.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Fileio.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Pair.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Time.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Types.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Sphere.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Comparison.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\String.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\ShaderManager.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\TextureManager.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Complex.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Fourier.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Math.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Quat.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Random.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Miscellaneous\Input.h">
+      <Filter>code\Miscellaneous</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Graphics\BlockCompression.h">
+      <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\BSP\Map.h">
+      <Filter>code\BSP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\BSP\Brush.h">
+      <Filter>code\BSP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\BSP\BSP.h">
+      <Filter>code\BSP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Body.h">
+      <Filter>code\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\BroadPhase.h">
+      <Filter>code\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\BVH.h">
+      <Filter>code\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Cloth.h">
+      <Filter>code\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Constraints.h">
+      <Filter>code\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Contact.h">
+      <Filter>code\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Intersections.h">
+      <Filter>code\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Manifold.h">
+      <Filter>code\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\PhysicsWorld.h">
+      <Filter>code\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Shapes.h">
+      <Filter>code\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Shapes\ShapeBase.h">
+      <Filter>code\Physics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Shapes\ShapeBox.h">
+      <Filter>code\Physics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Shapes\ShapeCapsule.h">
+      <Filter>code\Physics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Shapes\ShapeConvex.h">
+      <Filter>code\Physics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Shapes\ShapeSphere.h">
+      <Filter>code\Physics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Constraints\ConstraintBase.h">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Constraints\ConstraintConstantVelocity.h">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Constraints\ConstraintDistance.h">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Constraints\ConstraintHinge.h">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Constraints\ConstraintManifold.h">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Constraints\ConstraintMotor.h">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Constraints\ConstraintOrientation.h">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Physics\Constraints\ConstraintPenetration.h">
+      <Filter>code\Physics\Constraints</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\epa.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\gjk.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\IntersectionTests.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\lcp.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\MonteCarlo.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\Morton.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Math\SignedVolumes.h">
+      <Filter>code\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Entities\Entity.h">
+      <Filter>code\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Entities\Player.h">
+      <Filter>code\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Entities\Projectile.h">
+      <Filter>code\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Threading\Atomics.h">
+      <Filter>code\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Threading\Common.h">
+      <Filter>code\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Threading\Mutex.h">
+      <Filter>code\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Threading\ThreadLocks.h">
+      <Filter>code\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Threading\Threads.h">
+      <Filter>code\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\JobSystem\JobAllocators.h">
+      <Filter>code\JobSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\JobSystem\JobQueues.h">
+      <Filter>code\JobSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\JobSystem\JobSystem.h">
+      <Filter>code\JobSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\JobSystem\JobThread.h">
+      <Filter>code\JobSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\NavMesh\NavMesh.h">
+      <Filter>code\NavMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\NavMesh\PathFinding.h">
+      <Filter>code\NavMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\NavMesh\NavVoxels.h">
+      <Filter>code\NavMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\NavMesh\NavFile.h">
+      <Filter>code\NavMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Animation\MD5Anim.h">
+      <Filter>code\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Animation\MD5Model.h">
+      <Filter>code\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Animation\AnimMatrix.h">
+      <Filter>code\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Networking\Client.h">
+      <Filter>code\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Networking\Server.h">
+      <Filter>code\Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Networking\Sockets.h">
+      <Filter>code\Networking</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
