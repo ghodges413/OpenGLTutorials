@@ -14,7 +14,7 @@
 //					A leaf can also call into other behavior trees.  This allows for designers to chain together different trees.
 
 
-// Composite - Sequence, Selector, Random Sequence, Random Selector
+// Composite - Sequence (and), Selector/Fallback (or), Random Sequence, Random Selector
 // Decorator - Inverter, Succeeder, Failer, Repeater, Repeat Until Fail
 // Leaf - aside from actions, it can also do conditional/control flow stuff...
 //			such as PushStack(item, stackVar), PopStack(stack, itemVar), IsEmpty(stack)
