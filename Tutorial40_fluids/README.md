@@ -27,7 +27,7 @@ You can think of this as how much the vector field spreads out or compresses.
 
 And the curl is given by:
 
-$$\nabla \times F = ( \frac{ \partial F_z }{ \partial y } - \frac{ \partial F_y }{ \partial z } ) \hat x + \frac{ \partial F_x }{ \partial z } - \frac{ \partial F_z }{ \partial x } ) \hat y + \frac{ \partial F_y }{ \partial x } - \frac{ \partial F_x }{ \partial y } ) \hat z $$
+$$\nabla \times F = \left \frac{ \partial F_z }{ \partial y } - \frac{ \partial F_y }{ \partial z } \right \hat x + \left \frac{ \partial F_x }{ \partial z } - \frac{ \partial F_z }{ \partial x } \right \hat y + \left \frac{ \partial F_y }{ \partial x } - \frac{ \partial F_x }{ \partial y } \right \hat z $$
 
 This can be thought of how much the field rotates or swirls around.
 
@@ -53,7 +53,7 @@ $$a_g = g$$
 
 Next up is pressure.  Pressure is force per unit area.  However, if the pressure is uniform, then it won't push a volume element.  But if there's a pressure gradient, then it will be able to push a volume element.
 
-So, given a volume element (a cube) with side length $l$, and a pressure gradient in the x-direction, $\Delta p = p_{x1} - p_{x0}$, then force in the x-direction will be given by:
+So, given a volume element (a cube) with side length $l$, and a pressure gradient in the x-direction, $\Delta p = p_{x_1} - p_{x_0}$, then force in the x-direction will be given by:
 
 $$F_x = ma_x = l^3 \cdot \rho \cdot a = -\Delta p \cdot A = -\Delta p \cdot l^2 $$
 
@@ -167,6 +167,8 @@ The basic solver is to:
 $$p = \frac{ \kappa }{ \gamma } ( \frac{ \rho }{ \rho_0 } - 1 )^{\gamma}$$
 
 $$\kappa = \rho_0 \frac{ c_s }{ \gamma }$$
+
+Here, $c_s$ is the speed of sound (a constant in our simulation), and $\gamma$ is a tuning parameter.
 
 #### Pressure Gradient
 
