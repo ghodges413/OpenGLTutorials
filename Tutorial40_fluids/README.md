@@ -11,7 +11,7 @@ First some basic maths.
 
 Given a scalar field defined by a function, $f( x, y, z )$, the gradient is a vector field defined by:
 
-$$\Lambda f = \frac{ \partial f }{ \partial x } \hat x + \frac{ \partial f }{ \partial y } \hat y + \frac{ \partial f }{ \partial z } \hat z $$
+$$\nabla f = \frac{ \partial f }{ \partial x } \hat x + \frac{ \partial f }{ \partial y } \hat y + \frac{ \partial f }{ \partial z } \hat z $$
 
 This describes the slope of the function and the direction of the change.
 
@@ -19,7 +19,7 @@ This describes the slope of the function and the direction of the change.
 
 Given a vector field $F = ( F_x, F_y, F_z )$, the divergence is defined as:
 
-$$\Lambda \cdot F = \frac{ \partial F_x }{ \partial x } + \frac{ \partial F_y }{ \partial y } + \frac{ \partial F_z }{ \partial z }$$
+$$\nabla \cdot F = \frac{ \partial F_x }{ \partial x } + \frac{ \partial F_y }{ \partial y } + \frac{ \partial F_z }{ \partial z }$$
 
 You can think of this as how much the vector field spreads out or compresses.
 
@@ -27,7 +27,7 @@ You can think of this as how much the vector field spreads out or compresses.
 
 And the curl is given by:
 
-$$\nabla \cross F = ( \frac{ \partial F_z }{ \partial y } - \frac{ \partial F_y }{ \partial z } ) \hat x + \frac{ \partial F_x }{ \partial z } - \frac{ \partial F_z }{ \partial x } ) \hat y + \frac{ \partial F_y }{ \partial x } - \frac{ \partial F_x }{ \partial y } ) \hat z $$
+$$\nabla \times F = ( \frac{ \partial F_z }{ \partial y } - \frac{ \partial F_y }{ \partial z } ) \hat x + \frac{ \partial F_x }{ \partial z } - \frac{ \partial F_z }{ \partial x } ) \hat y + \frac{ \partial F_y }{ \partial x } - \frac{ \partial F_x }{ \partial y } ) \hat z $$
 
 This can be thought of how much the field rotates or swirls around.
 
