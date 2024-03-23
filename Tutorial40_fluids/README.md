@@ -27,8 +27,7 @@ You can think of this as how much the vector field spreads out or compresses.
 
 And the curl is given by:
 
-$$
-abla \cross F = ( \frac{ \partial F_z }{ \partial y } - \frac{ \partial F_y }{ \partial z } ) \hat x + \frac{ \partial F_x }{ \partial z } - \frac{ \partial F_z }{ \partial x } ) \hat y + \frac{ \partial F_y }{ \partial x } - \frac{ \partial F_x }{ \partial y } ) \hat z $$
+$$\nabla \cross F = ( \frac{ \partial F_z }{ \partial y } - \frac{ \partial F_y }{ \partial z } ) \hat x + \frac{ \partial F_x }{ \partial z } - \frac{ \partial F_z }{ \partial x } ) \hat y + \frac{ \partial F_y }{ \partial x } - \frac{ \partial F_x }{ \partial y } ) \hat z $$
 
 This can be thought of how much the field rotates or swirls around.
 
@@ -36,10 +35,7 @@ This can be thought of how much the field rotates or swirls around.
 
 And finally the Laplacian of a scalar field is the divergence of the gradient:
 
-$$
-abla \dot 
-abla f = 
-abla^2 f = \frac{ \partial^2 f }{ \partial x^2 } + \frac{ \partial^2 f }{ \partial y^2 } + \frac{ \partial^2 f }{ \partial z^2 }$$
+$$\nabla \dot \nabla f = \nabla^2 f = \frac{ \partial^2 f }{ \partial x^2 } + \frac{ \partial^2 f }{ \partial y^2 } + \frac{ \partial^2 f }{ \partial z^2 }$$
 
 Which describes how "lumpy" the function is.  Basically, if the function describes a heightfield, then the Laplacian tells us where the peaks and vallies are located.
 
@@ -67,37 +63,30 @@ $$a_x = \frac{ -\delta p }{ \rho l } = -\frac{ \partial p }{ \partial x } \frac{
 
 Which means the general acceleration for pressure will be:
 
-$$a_p = -\frac{ 
-abla p }{ \rho }$$
+$$a_p = -\frac{ \nabla p }{ \rho }$$
 
 ### Viscosity
 
 Viscosity can be modeled as "blurring" the velocity field of a fluid.  Therefore the change in the velocity field can be written as:
 
-$$v' = v + \delta t \mu 
-abla^2v$$
+$$v' = v + \delta t \mu \nabla^2v$$
 
 $v'$ is the new velocity, $v$ is the old velocity, $\delta t$ is the change in time, and $\mu$ is a positive scaling factor.  Re-arranging the equation a little, we can get the acceleration:
 
-$$a = \frac{ v' - v }{ \delta t } = \mu 
-abla^2v$$
+$$a = \frac{ v' - v }{ \delta t } = \mu \nabla^2v$$
 
 ### Density Constraint
 
 If we are to simulate an incompressible fluid, then the density must remain constant $\rho = \rho_c$.  Which means the divergence must be zero.
 
-$$
-abla \dot v = 0$$
+$$\nabla \dot v = 0$$
 
 ### Navier-Stokes
 
 Combining all these equations gives us the Navier-Stokes equations for incompressible flows.
 
-$$a = g - \frac{ 
-abla p }{ \rho } + \mu 
-abla^2 v$$
-$$
-abla \dot v = 0$$
+$$a = g - \frac{ \nabla p }{ \rho } + \mu \nabla^2 v$$
+$$\nabla \dot v = 0$$
 
 
 ## Lagrangian Framework
@@ -110,7 +99,7 @@ Smoothed Particle Hydrodynamics (SPH) was originally developed by astrophysicist
 
 All Kernels are required to evaluate to 1 when integrated over all of space:
 
-$$\Int W(r) = 1$$
+$$\int W(r) = 1$$
 
 #### Gaussian Kernel
 
@@ -152,21 +141,15 @@ $$\rho( x ) = m \sum_j W( x - x_j )$$
 
 #### Gradient
 
-$$
-abla \phi( x ) = m \sum_j \frac{ \phi_j }{ \rho_j } 
-abla W( \abs{x - x_j} )$$
+$$\nabla \phi( x ) = m \sum_j \frac{ \phi_j }{ \rho_j } \nabla W( \abs{x - x_j} )$$
 
 However, this version of the gradient can be asymetric.  So two particles may calculate different values.  Which will cause different forces opposing forces.  So, an alternate gradient can be defined as:
 
-$$
-abla \phi( x ) = \rho_i m \sum_j ( \frac{ \phi_i }{ \rho_i^2 } + \frac{ \phi_j }{ \rho_j^2 } ) 
-abla W( \abs{ x - x_j } )$$
+$$\nabla \phi( x ) = \rho_i m \sum_j ( \frac{ \phi_i }{ \rho_i^2 } + \frac{ \phi_j }{ \rho_j^2 } ) \nabla W( \abs{ x - x_j } )$$
 
 #### Laplacian
 
-$$
-abla^2 \phi( x ) = m \sum_j ( \frac{ \phi_j - \phi_i }{ \rho_j } ) 
-abla^2 W( x - x_j )$$
+$$\nabla^2 \phi( x ) = m \sum_j ( \frac{ \phi_j - \phi_i }{ \rho_j } ) \nabla^2 W( x - x_j )$$
 
 #### Solver
 
@@ -187,13 +170,11 @@ $$\kappa = \rho_0 \frac{ c_s }{ \gamma }$$
 
 #### Pressure Gradient
 
-$$f_p = -m^2 \sum_j ( \frac{ p_i }{ \rho_i }^2 + \frac{ p_j }{ \rho_j^2 } ) 
-abla W( x - x_j )$$
+$$f_p = -m^2 \sum_j ( \frac{ p_i }{ \rho_i }^2 + \frac{ p_j }{ \rho_j^2 } ) \nabla W( x - x_j )$$
 
 #### Viscosity
 
-$$f_v = -m \sum_j ( \frac{ u_j - u_i }{ \rho_j } ) 
-abla^2 W( x - x_j )$$
+$$f_v = -m \sum_j ( \frac{ u_j - u_i }{ \rho_j } ) \nabla^2 W( x - x_j )$$
 
 #### Collision
 
