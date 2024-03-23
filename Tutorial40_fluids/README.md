@@ -19,7 +19,7 @@ This describes the slope of the function and the direction of the change.
 
 Given a vector field $F = ( F_x, F_y, F_z )$, the divergence is defined as:
 
-$$\Lambda \dot F = \frac{ \partial F_x }{ \partial x } + \frac{ \partial F_y }{ \partial y } + \frac{ \partial F_z }{ \partial z }$$
+$$\Lambda \cdot F = \frac{ \partial F_x }{ \partial x } + \frac{ \partial F_y }{ \partial y } + \frac{ \partial F_z }{ \partial z }$$
 
 You can think of this as how much the vector field spreads out or compresses.
 
@@ -35,7 +35,7 @@ This can be thought of how much the field rotates or swirls around.
 
 And finally the Laplacian of a scalar field is the divergence of the gradient:
 
-$$\nabla \dot \nabla f = \nabla^2 f = \frac{ \partial^2 f }{ \partial x^2 } + \frac{ \partial^2 f }{ \partial y^2 } + \frac{ \partial^2 f }{ \partial z^2 }$$
+$$\nabla \cdot \nabla f = \nabla^2 f = \frac{ \partial^2 f }{ \partial x^2 } + \frac{ \partial^2 f }{ \partial y^2 } + \frac{ \partial^2 f }{ \partial z^2 }$$
 
 Which describes how "lumpy" the function is.  Basically, if the function describes a heightfield, then the Laplacian tells us where the peaks and vallies are located.
 
@@ -55,7 +55,7 @@ Next up is pressure.  Pressure is force per unit area.  However, if the pressure
 
 So, given a volume element (a cube) with side length $l$, and a pressure gradient in the x-direction, $\delta p = p_{x1} - p_{x0}$, then force in the x-direction will be given by:
 
-$$F_x = ma_x = l^3 \dot \rho \dot a = -\delta p \dot A = -\delta p \dot l^2 $$
+$$F_x = ma_x = l^3 \cdot \rho \cdot a = -\delta p \cdot A = -\delta p \cdot l^2 $$
 
 This means that the acceleration in the x-direction is:
 
@@ -79,14 +79,14 @@ $$a = \frac{ v' - v }{ \delta t } = \mu \nabla^2v$$
 
 If we are to simulate an incompressible fluid, then the density must remain constant $\rho = \rho_c$.  Which means the divergence must be zero.
 
-$$\nabla \dot v = 0$$
+$$\nabla \cdot v = 0$$
 
 ### Navier-Stokes
 
 Combining all these equations gives us the Navier-Stokes equations for incompressible flows.
 
 $$a = g - \frac{ \nabla p }{ \rho } + \mu \nabla^2 v$$
-$$\nabla \dot v = 0$$
+$$\nabla \cdot v = 0$$
 
 
 ## Lagrangian Framework
