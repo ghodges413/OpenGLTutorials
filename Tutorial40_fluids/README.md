@@ -27,7 +27,7 @@ You can think of this as how much the vector field spreads out or compresses.
 
 And the curl is given by:
 
-$$\nabla \times F = \left \frac{ \partial F_z }{ \partial y } - \frac{ \partial F_y }{ \partial z } \right \hat x + \left \frac{ \partial F_x }{ \partial z } - \frac{ \partial F_z }{ \partial x } \right \hat y + \left \frac{ \partial F_y }{ \partial x } - \frac{ \partial F_x }{ \partial y } \right \hat z $$
+$$\nabla \times F = \left( \frac{ \partial F_z }{ \partial y } - \frac{ \partial F_y }{ \partial z } \right) \hat x + \left( \frac{ \partial F_x }{ \partial z } - \frac{ \partial F_z }{ \partial x } \right) \hat y + \left( \frac{ \partial F_y }{ \partial x } - \frac{ \partial F_x }{ \partial y } \right) \hat z $$
 
 This can be thought of how much the field rotates or swirls around.
 
