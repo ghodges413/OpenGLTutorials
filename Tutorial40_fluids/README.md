@@ -145,11 +145,11 @@ $$\nabla \phi( x ) = m \sum_j \frac{ \phi_j }{ \rho_j } \nabla W( \vert x - x_j 
 
 However, this version of the gradient can be asymetric.  So two particles may calculate different values.  Which will cause different forces opposing forces.  So, an alternate gradient can be defined as:
 
-$$\nabla \phi( x ) = \rho_i m \sum_j ( \frac{ \phi_i }{ \rho_i^2 } + \frac{ \phi_j }{ \rho_j^2 } ) \nabla W( \vert x - x_j \vert )$$
+$$\nabla \phi( x ) = \rho_i m \sum_j \left( \frac{ \phi_i }{ \rho_i^2 } + \frac{ \phi_j }{ \rho_j^2 } \right) \nabla W( \vert x - x_j \vert )$$
 
 #### Laplacian
 
-$$\nabla^2 \phi( x ) = m \sum_j ( \frac{ \phi_j - \phi_i }{ \rho_j } ) \nabla^2 W( x - x_j )$$
+$$\nabla^2 \phi( x ) = m \sum_j \left( \frac{ \phi_j - \phi_i }{ \rho_j } \right) \nabla^2 W( x - x_j )$$
 
 #### Solver
 
@@ -172,11 +172,11 @@ Here, $c_s$ is the speed of sound (a constant in our simulation), and $\gamma$ i
 
 #### Pressure Gradient
 
-$$f_p = -m^2 \sum_j ( \frac{ p_i }{ \rho_i^2 } + \frac{ p_j }{ \rho_j^2 } ) \nabla W( x - x_j )$$
+$$f_p = -m^2 \sum_j \left( \frac{ p_i }{ \rho_i^2 } + \frac{ p_j }{ \rho_j^2 } \right) \nabla W( x - x_j )$$
 
 #### Viscosity
 
-$$f_v = -m \sum_j ( \frac{ u_j - u_i }{ \rho_j } ) \nabla^2 W( x - x_j )$$
+$$f_v = -m \sum_j \left( \frac{ u_j - u_i }{ \rho_j } \right) \nabla^2 W( x - x_j )$$
 
 #### Collision
 
