@@ -141,11 +141,11 @@ $$\rho( x ) = m \sum_j W( x - x_j )$$
 
 #### Gradient
 
-$$\nabla \phi( x ) = m \sum_j \frac{ \phi_j }{ \rho_j } \nabla W( \abs{x - x_j} )$$
+$$\nabla \phi( x ) = m \sum_j \frac{ \phi_j }{ \rho_j } \nabla W( \vert x - x_j \vert )$$
 
 However, this version of the gradient can be asymetric.  So two particles may calculate different values.  Which will cause different forces opposing forces.  So, an alternate gradient can be defined as:
 
-$$\nabla \phi( x ) = \rho_i m \sum_j ( \frac{ \phi_i }{ \rho_i^2 } + \frac{ \phi_j }{ \rho_j^2 } ) \nabla W( \abs{ x - x_j } )$$
+$$\nabla \phi( x ) = \rho_i m \sum_j ( \frac{ \phi_i }{ \rho_i^2 } + \frac{ \phi_j }{ \rho_j^2 } ) \nabla W( \vert x - x_j \vert } )$$
 
 #### Laplacian
 
@@ -170,7 +170,7 @@ $$\kappa = \rho_0 \frac{ c_s }{ \gamma }$$
 
 #### Pressure Gradient
 
-$$f_p = -m^2 \sum_j ( \frac{ p_i }{ \rho_i }^2 + \frac{ p_j }{ \rho_j^2 } ) \nabla W( x - x_j )$$
+$$f_p = -m^2 \sum_j ( \frac{ p_i }{ \rho_i^2 } + \frac{ p_j }{ \rho_j^2 } ) \nabla W( x - x_j )$$
 
 #### Viscosity
 
