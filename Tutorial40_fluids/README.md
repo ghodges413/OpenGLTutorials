@@ -53,13 +53,13 @@ $$a_g = g$$
 
 Next up is pressure.  Pressure is force per unit area.  However, if the pressure is uniform, then it won't push a volume element.  But if there's a pressure gradient, then it will be able to push a volume element.
 
-So, given a volume element (a cube) with side length $l$, and a pressure gradient in the x-direction, $\delta p = p_{x1} - p_{x0}$, then force in the x-direction will be given by:
+So, given a volume element (a cube) with side length $l$, and a pressure gradient in the x-direction, $\Delta p = p_{x1} - p_{x0}$, then force in the x-direction will be given by:
 
-$$F_x = ma_x = l^3 \cdot \rho \cdot a = -\delta p \cdot A = -\delta p \cdot l^2 $$
+$$F_x = ma_x = l^3 \cdot \rho \cdot a = -\Delta p \cdot A = -\Delta p \cdot l^2 $$
 
 This means that the acceleration in the x-direction is:
 
-$$a_x = \frac{ -\delta p }{ \rho l } = -\frac{ \partial p }{ \partial x } \frac{ 1 }{ \rho }$$
+$$a_x = \frac{ -\Delta p }{ \rho l } = -\frac{ \partial p }{ \partial x } \frac{ 1 }{ \rho }$$
 
 Which means the general acceleration for pressure will be:
 
@@ -69,11 +69,11 @@ $$a_p = -\frac{ \nabla p }{ \rho }$$
 
 Viscosity can be modeled as "blurring" the velocity field of a fluid.  Therefore the change in the velocity field can be written as:
 
-$$v' = v + \delta t \mu \nabla^2v$$
+$$v' = v + \Delta t \mu \nabla^2v$$
 
-$v'$ is the new velocity, $v$ is the old velocity, $\delta t$ is the change in time, and $\mu$ is a positive scaling factor.  Re-arranging the equation a little, we can get the acceleration:
+$v'$ is the new velocity, $v$ is the old velocity, $\Delta t$ is the change in time, and $\mu$ is a positive scaling factor.  Re-arranging the equation a little, we can get the acceleration:
 
-$$a = \frac{ v' - v }{ \delta t } = \mu \nabla^2v$$
+$$a = \frac{ v' - v }{ \Delta t } = \mu \nabla^2v$$
 
 ### Density Constraint
 
