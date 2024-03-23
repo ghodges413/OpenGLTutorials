@@ -155,12 +155,12 @@ $$\nabla^2 \phi( x ) = m \sum_j ( \frac{ \phi_j - \phi_i }{ \rho_j } ) \nabla^2 
 
 The basic solver is to:
 
-Calculate the densities
-Calculate pressure from density
-Calculate pressure gradient force
-Calculate viscosity force
-Calculate gravity
-Step time
+- Calculate the densities
+- Calculate pressure from density
+- Calculate pressure gradient force
+- Calculate viscosity force
+- Calculate gravity
+- Step time
 
 #### Pressure
 
