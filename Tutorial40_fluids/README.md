@@ -101,7 +101,7 @@ All Kernels are required to evaluate to 1 when integrated over all of space:
 
 $$\int W(r) = 1$$
 
-#### Gaussian Kernel
+#### Smooth Kernel
 
 $$
 W_{std}(r)=\frac{315}{64\pi h^3}
@@ -111,7 +111,7 @@ W_{std}(r)=\frac{315}{64\pi h^3}
 \end{cases}
 $$
 
-While the Gaussian kernel is perfectly suitable in a spatial sense, its first and second derivatives oscillate.  The oscillation of the derivatives can create unintentional attractive forces between particles.  We would like to avoid this, and a different kernel has been developed to handle this problem.
+While the smooth kernel is perfectly suitable in a spatial sense, its first and second derivatives oscillate.  The oscillation of the derivatives can create unintentional attractive forces between particles.  We would like to avoid this, and a different kernel has been developed to handle this problem.
 
 #### Spikey Kernel
 
