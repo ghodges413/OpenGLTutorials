@@ -1,0 +1,120 @@
+#version 450
+
+
+struct fluid_t {
+	vec3 pos;
+	float pad0;
+
+	vec3 vel;
+	float pad1;
+
+	vec3 posOld;
+	float density;
+};
+
+layout( std430, binding = 0 ) buffer fluidParticles {
+	fluid_t particles[];
+};
+
+struct elem_t {
+	int idx;
+	int key;
+};
+
+layout( std430, binding = 1 ) buffer elements {
+	elem_t sorted[];
+};
+
+#define WORK_GROUP_SIZE 128
+layout ( local_size_x = WORK_GROUP_SIZE, local_size_y = 1, local_size_z = 1 ) in;
+
+uniform int MAX_PARTICLES;
+uniform float PARTICLE_RADIUS;
+
+
+
+#define GRID_SPACING PARTICLE_RADIUS
+
+uniform int RESOLUTION_X;
+uniform int RESOLUTION_Y;
+uniform int RESOLUTION_Z;
+
+#define NUM_CELLS ( RESOLUTION_X * RESOLUTION_Y * RESOLUTION_Z )
+
+/*
+====================================
+GetGridPos
+====================================
+*/
+ivec3 GetGridPos( vec3 pos ) {
+	ivec3 v;
+	v.x = int( pos.x / GRID_SPACING );
+	v.y = int( pos.y / GRID_SPACING );
+	v.z = int( pos.z / GRID_SPACING );
+	return v;
+}
+
+/*
+====================================
+GetHashKeyFromBucketIndex
+====================================
+*/
+int GetHashKeyFromBucketIndex( ivec3 idx ) {
+	ivec3 idx2 = idx;
+
+	idx2.x = idx.x % RESOLUTION_X;
+	idx2.y = idx.y % RESOLUTION_Y;
+	idx2.z = idx.z % RESOLUTION_Z;
+
+	if ( idx2.x < 0 ) {
+		idx2.x += RESOLUTION_X;
+	}
+	if ( idx2.y < 0 ) {
+		idx2.y += RESOLUTION_Y;
+	}
+	if ( idx2.z < 0 ) {
+		idx2.z += RESOLUTION_Z;
+	}
+
+	int key = idx2.x + RESOLUTION_X * ( idx2.y + RESOLUTION_Y * idx2.z );
+	return key;
+}
+
+/*
+====================================
+GetHashKeyFromPosition
+====================================
+*/
+int GetHashKeyFromPosition( vec3 pos ) {
+	ivec3 idx = GetGridPos( pos );
+	return GetHashKeyFromBucketIndex( idx );
+}
+
+/*
+==========================
+main
+==========================
+*/
+void main() {
+	int thread_id = int( gl_GlobalInvocationID.x );
+	if ( thread_id >= MAX_PARTICLES ) {
+		return;
+	}
+
+	float dt = 1.0 / 60.0;
+
+	// Prediction + Gravity
+	int i = thread_id;
+	{
+		// Apply gravity
+		particles[ i ].vel.z += -0.10f * dt;
+
+		// Predict position
+		particles[ i ].posOld = particles[ i ].pos;
+		particles[ i ].pos = particles[ i ].pos + particles[ i ].vel * dt;
+	}
+
+	// Now we need to update the grid cells
+	sorted[ i ].idx = i;
+	sorted[ i ].key = GetHashKeyFromPosition( particles[ i ].pos );
+}

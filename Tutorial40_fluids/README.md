@@ -185,3 +185,26 @@ As for handling collision with external geometry, the collision can be resolved 
 ## Eulerian Framework
 
 The Eulerian framework is a simulation that represents fuild with a grid.
+
+
+## References
+
+"Particle Simulation using CUDA" by Simon Green
+
+"Fluid Engine Development" by Doyub Kim
+
+"Smoothed Particle Hydrodynamics Techniques for the PHysics Based Simulation of Fluids and Solids", Dan Koschier
+
+"Particle-based Viscoelastic Fluid Simulation", Simon Clavet
+
+"Particle-based Fluid Simulation for Interactive Applications", Mathias Muller
+
+"Fluid Simulation" by Sebastian Lague
+
+"Fast Fluid Simulations with Sparse Volumes on the GPU", Kui Wu
+
+
+
+
+
+

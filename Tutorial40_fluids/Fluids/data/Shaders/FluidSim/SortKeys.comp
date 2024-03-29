@@ -1,0 +1,62 @@
+#version 450
+
+struct elem_t {
+	int idx;
+	int key;
+};
+
+layout( std430, binding = 1 ) buffer elements {
+	elem_t sorted[];
+};
+
+#define WORK_GROUP_SIZE 128
+layout ( local_size_x = WORK_GROUP_SIZE, local_size_y = 1, local_size_z = 1 ) in;
+
+uniform int groupWidth;
+uniform int groupHeight;
+uniform int stepIndex;
+
+uniform int MAX_PARTICLES;
+ 
+ /*
+ ==========================
+ BitonicMergeSort
+
+ This function has been adapted from Sebastian Langue's "Fluid Simulation"
+ ==========================
+ */
+void BitonicMergeSort() {
+	int thread_id = int( gl_GlobalInvocationID.x );
+	uint i = uint( thread_id );
+	uint h = i & ( groupWidth - 1 );
+	uint indexLow = h + ( groupHeight + 1 ) * ( i / groupWidth );
+	uint indexHigh = indexLow + ( groupHeight + 1 ) / 2;
+	if ( 0 == stepIndex ) {
+		indexHigh = indexLow + groupHeight - 2 * h;
+	}
+
+	// Exit if out of bounds (requried for non-power of 2 input sizes)
+	if ( indexHigh >= MAX_PARTICLES ) {
+		return;
+	}
+
+	// Get the actual values fo the pair
+	int valueLow = sorted[ indexLow ].key;
+	int valueHigh = sorted[ indexHigh ].key;
+
+	// Swap if the pair is incorrectly ordered
+	if ( valueLow > valueHigh ) {
+		elem_t tmp = sorted[ indexLow ];
+		sorted[ indexLow ] = sorted[ indexHigh ];
+		sorted[ indexHigh ] = tmp;
+	}
+}
+
+/*
+==========================
+main
+==========================
+*/
+void main() {
+	BitonicMergeSort();
+}

@@ -1,0 +1,38 @@
+#version 450
+
+struct elem_t {
+	int idx;
+	int key;
+};
+
+layout( std430, binding = 1 ) buffer elements {
+	elem_t sorted[];
+};
+
+layout( std430, binding = 2 ) buffer starts {
+	int startIndices[];
+};
+
+#define WORK_GROUP_SIZE 128
+layout ( local_size_x = WORK_GROUP_SIZE, local_size_y = 1, local_size_z = 1 ) in;
+
+uniform int MAX_PARTICLES;
+uniform int NUM_CELLS;
+
+/*
+==========================
+main
+==========================
+*/
+void main() {
+	int thread_id = int( gl_GlobalInvocationID.x );
+	if ( thread_id >= MAX_PARTICLES ) {
+		return;
+	}
+
+	int j = thread_id;
+	elem_t elem = sorted[ j ];
+
+	int i = elem.key;
+	atomicMin( startIndices[ i ], j );
+}
