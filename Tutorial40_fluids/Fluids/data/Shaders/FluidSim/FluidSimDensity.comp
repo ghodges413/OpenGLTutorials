@@ -198,12 +198,15 @@ float Density_SL( vec3 pt, int skip ) {
 		}
 	}
 
+	if ( density < TARGET_DENSITY ) {
+		density = TARGET_DENSITY;
+	}
 	return density;
 }
 
 float Density( const int i ) {
 	const float mass = 1;
-	float sum = 0;
+	float density = 0;
 
 	int neighborKeys[ 27 ];
 	GetNearbyKeys( particles[ i ].pos, neighborKeys );
@@ -232,11 +235,14 @@ float Density( const int i ) {
 			float dist = length( xi - xj );
 			//float weight = PARTICLE_MASS * Kernel_Spiky( dist );
 			float weight = mass * Kernel_SL_smooth( dist );
-			sum += weight;
+			density += weight;
 		}
 	}
 
-	return sum;
+	if ( density < TARGET_DENSITY ) {
+		density = TARGET_DENSITY;
+	}
+	return density;
 }
 
 /*

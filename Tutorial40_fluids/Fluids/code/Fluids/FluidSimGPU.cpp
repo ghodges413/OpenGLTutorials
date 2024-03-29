@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <string>
 
+#if 0
 #define SPEED_OF_SOUND 1.0f
 #define VISCOSITY_COEFFICIENT 0.001f
 #define TARGET_DENSITY ( g_targetDensity * 0.01f )
@@ -20,7 +21,18 @@
 
 #define NEGATIVE_PRESSURE_SCALE 0.0f
 #define VISCOSITY_STRENGTH 0.185f
+#else
+#define SPEED_OF_SOUND 0.5f//100.0f
+#define VISCOSITY_COEFFICIENT 0.001f
+#define TARGET_DENSITY ( g_targetDensity * 0.1f )
+#define PRESSURE_MULTIPLIER 0.25f
+#define PRESSURE_GAMMA 1.0f
 
+#define NEGATIVE_PRESSURE_SCALE 1.0f
+#define VISCOSITY_STRENGTH 0.185f
+#endif
+
+#define RESTITUTION 0.85f
 
 #define RESOLUTION_X 20
 #define RESOLUTION_Y 40
@@ -254,8 +266,7 @@ void FluidSimGPU() {
 		const Vec3 boundsMin = g_particleBounds.mins;
 		const Vec3 boundsMax = g_particleBounds.maxs;
 
-		const float restitution = 0.59f;
-		//const float restitution = 0;
+		const float restitution = RESTITUTION;
 
 		shader->SetUniform1i( "MAX_PARTICLES", 1, &maxParticles );
 		shader->SetUniform1i( "NUM_CELLS", 1, &numCells );

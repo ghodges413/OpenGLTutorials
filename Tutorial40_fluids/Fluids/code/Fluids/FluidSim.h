@@ -6,9 +6,9 @@
 #include "Math/Quat.h"
 #include "Math/Matrix.h"
 
-#define FLUID_SIM_CPU // toggle to switch between cpu and gpu sims
+//#define FLUID_SIM_CPU // toggle to switch between cpu and gpu sims
 
-#define SIDE_SIZE 24
+#define SIDE_SIZE 16
 #if defined( FLUID_SIM_CPU )
 #define MAX_PARTICLES ( SIDE_SIZE * SIDE_SIZE )
 
@@ -19,7 +19,7 @@
 #define MAX_PARTICLES ( SIDE_SIZE * SIDE_SIZE * SIDE_SIZE )
 
 #define PARTICLE_MASS 1
-#define PARTICLE_RADIUS 1.25f
+#define PARTICLE_RADIUS 0.25f
 #endif
 
 #define FS_PI 3.1415f

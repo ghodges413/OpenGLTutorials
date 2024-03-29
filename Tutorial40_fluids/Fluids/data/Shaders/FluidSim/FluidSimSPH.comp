@@ -261,7 +261,8 @@ vec3 PressureForce_SL( vec3 pt, int skip ) {
 			float slope = Kernel_SL_1stDerivative( dist );
 			float density = particle.density;
 			float pressure = DensityToPressureShared_SL( density, particles[ skip ].density );
-			if ( abs( density ) > 0.0001 ) {
+			//if ( abs( density ) > 0.0001 ) 
+			{
 				grad += dir * pressure * slope * mass / density;
 			}
 		}
@@ -384,9 +385,7 @@ vec3 PressureForce( const int i ) {
 			float dj = particles[ idx ].density;
 
 			vec3 grad = Kernel_Spiky_Gradient( dist, dir );
-			if ( di > 0.001f && dj > 0.001f && length( grad ) > 0.001f ) {
-				f -= grad * mass * mass * ( pi / ( di * di ) + pj / ( dj * dj ) );
-			}
+			f -= grad * mass * mass * ( pi / ( di * di ) + pj / ( dj * dj ) );
 		}
 	}
 
@@ -433,10 +432,8 @@ vec3 ViscosityForce( const int i ) {
 
 			vec3 vj = particles[ idx ].vel;
 			float dj = particles[ idx ].density;
-			if ( dj > 0.001f ) {
-				float VISCOSITY_COEFFICIENT = VISCOSITY_STRENGTH;
-				f += ( ( vj - vi ) / dj ) * VISCOSITY_COEFFICIENT * mass * mass * Kernel_Spiky_2ndDerivative( dist );
-			}
+			float VISCOSITY_COEFFICIENT = VISCOSITY_STRENGTH;
+			f += ( ( vj - vi ) / dj ) * VISCOSITY_COEFFICIENT * mass * mass * Kernel_Spiky_2ndDerivative( dist );
 		}
 	}
 
@@ -468,13 +465,11 @@ void main() {
 	// Calculate the viscosity force
 	//vec3 viscosityForce = ViscosityForce_SL( i );
 	vec3 viscosityForce = ViscosityForce( i );	
-	viscosityForce = vec3( 0 );
+	//viscosityForce = vec3( 0 );
 
 	// Calculate the acceleration from the force
-	vec3 a = vec3( 0 );
-	if ( abs( particles[ i ].density ) > 0.001 ) {
-		a = ( pressureForce + viscosityForce ) / particles[ i ].density;
-	}
+	const float mass = 1.0f;
+	vec3 a = ( pressureForce + viscosityForce ) / mass;
 
 	particles[ i ].vel += a * dt;
 	particles[ i ].pos = particles[ i ].posOld + particles[ i ].vel * dt;

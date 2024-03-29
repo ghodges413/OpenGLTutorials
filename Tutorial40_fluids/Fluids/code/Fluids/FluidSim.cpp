@@ -22,6 +22,8 @@
 #define NEGATIVE_PRESSURE_SCALE 1.0f
 #define VISCOSITY_STRENGTH 0.185f
 
+#define RESTITUTION 0.59f
+
 float g_targetDensity = 1;
 
 
@@ -567,7 +569,7 @@ void FluidSimStep( float dt ) {
 		Vec3 & vel = g_particles[ i ].vel;
 
 		// Handle collisions
-		const float restitution = 0.59f;
+		const float restitution = RESTITUTION;
 		for ( int j = 0; j < 3; j++ ) {
 			if ( pos[ j ] < g_particleBounds.mins[ j ] ) {
 				pos[ j ] = g_particleBounds.mins[ j ];
