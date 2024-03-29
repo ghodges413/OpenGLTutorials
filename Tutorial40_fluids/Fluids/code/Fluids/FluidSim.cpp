@@ -4,12 +4,23 @@
 #include "Graphics/ShaderStorageBuffer.h"
 #include "Graphics/Graphics.h"
 #include "Fluids/FluidSim.h"
+#include "Fluids/FluidSimGPU.h"
 #include "Fluids/HashGrid.h"
 #include "Math/Bounds.h"
 #include "Math/Random.h"
 #include <stdio.h>
 #include <string>
 #include <math.h>
+
+
+#define SPEED_OF_SOUND 0.5f//100.0f
+#define VISCOSITY_COEFFICIENT 0.1f
+#define TARGET_DENSITY ( g_targetDensity * 0.1f )
+#define PRESSURE_MULTIPLIER 0.25f
+#define PRESSURE_GAMMA 1.0f
+
+#define NEGATIVE_PRESSURE_SCALE 1.0f
+#define VISCOSITY_STRENGTH 0.185f
 
 float g_targetDensity = 1;
 
@@ -18,9 +29,7 @@ fluid_t g_particles[ MAX_PARTICLES ];
 
 Bounds g_particleBounds;
 
-ShaderStorageBuffer g_ssboFluidParticles;
-
-typedef float kernel_ftor( Vec3 pos, Vec3 a );
+extern ShaderStorageBuffer g_ssboFluidParticles;
 
 /*
 ====================================
@@ -35,9 +44,12 @@ void ResetFluidSim() {
 	int idx = 0;
 	for ( int z = 0; z < SIDE_SIZE; z++ ) {
 		for ( int y = 0; y < SIDE_SIZE; y++ ) {
-			for ( int x = 0; x < SIDE_SIZE; x++ ) 
+#if defined( FLUID_SIM_CPU )
 			{
-				//int x = 0;
+				int x = 0;
+#else
+			for ( int x = 0; x < SIDE_SIZE; x++ ) {
+#endif
 				fluid_t & particle = g_particles[ idx ];
 				particle.pos = Vec3( x, y - SIDE_SIZE / 2, z ) * 0.125f;
 				particle.pos += Vec3( 0, 0, 1 );
@@ -235,9 +247,11 @@ float Kernel_SL_1stDerivative( float x ) {
 
 std::vector< int > g_neighborIds;
 
-float Density_SL( Vec3 pt, int skip ) {
+float Density_SL( int skip ) {
 	const float mass = 1;
 	float density = 0;
+
+	Vec3 pt = g_particles[ skip ].pos;
 
 	g_neighborIds.clear();
 	GetNeighborIds_Cells( g_neighborIds, skip );
@@ -253,6 +267,9 @@ float Density_SL( Vec3 pt, int skip ) {
 		density += mass * influence;
 	}
 
+	if ( density < TARGET_DENSITY ) {
+		density = TARGET_DENSITY;
+	}
 	return density;
 }
 
@@ -272,34 +289,11 @@ float DensityToPressureShared_SL( float density0, float density1 ) {
 	return ( pressure0 + pressure1 ) * 0.5f;
 }
 
-Vec3 Kernel_SL_Gradient( Vec3 pt ) {
+Vec3 PressureForce_SL( int skip ) {
 	const float mass = 1;
 	Vec3 grad = Vec3( 0, 0, 0 );
 
-	g_neighborIds.clear();
-	GetNeighborIds( g_neighborIds, pt );
-
-	for ( int i = 0; i < g_neighborIds.size(); i++ ) {
-		const int idx = g_neighborIds[ i ];
-
-		const fluid_t & particle = g_particles[ idx ];
-		float dist = ( pt - particle.pos ).GetMagnitude();
-		Vec3 dir = ( pt - particle.pos ) / dist;
-		if ( dist < 0.00001f ) {
-			// if the two points are the same, then just choose a random direction
-			dir = Random::RandomOnSphereSurface();
-		}
-		float slope = Kernel_SL_1stDerivative( dist );
-		float density = Density_SL( pt, -1 );
-		grad -= dir * slope * mass / density;
-	}
-
-	return grad;
-}
-
-Vec3 PressureForce_SL( Vec3 pt, int skip ) {
-	const float mass = 1;
-	Vec3 grad = Vec3( 0, 0, 0 );
+	Vec3 pt = g_particles[ skip ].pos;
 
 	g_neighborIds.clear();
 	GetNeighborIds_Cells( g_neighborIds, skip );
@@ -312,16 +306,17 @@ Vec3 PressureForce_SL( Vec3 pt, int skip ) {
 
 		const fluid_t & particle = g_particles[ idx ];
 		float dist = ( pt - particle.pos ).GetMagnitude();
-		Vec3 dir( 0, 0, 0 );
-		if ( dist > 0.00001f ) {
-			dir = ( pt - particle.pos ) / dist;
-		}
+		Vec3 dir = pt - particle.pos;
+		dir.Normalize();
+// 		if ( dir.GetMagnitude() < 0.1f ) {
+// 			dir = Random::RandomOnSphereSurface();
+// 		}
+
 		float slope = Kernel_SL_1stDerivative( dist );
 		float density = particle.density;
 		float pressure = DensityToPressureShared_SL( density, g_particles[ skip ].density );
-		if ( fabsf( density ) > 0.00001f ) {
-			grad += dir * pressure * slope * mass / density;
-		}
+		float magnitude = pressure * slope * mass / density;
+		grad += dir * magnitude;
 	}
 
 	return grad;
@@ -357,7 +352,7 @@ Calculates the density of the sample position, within the neighborhood of partic
 ====================================
 */
 float Density( const int i ) {
-	float sum = 0;
+	float density = 0;
 
 	g_neighborIds.clear();
 	GetNeighborIds_Cells( g_neighborIds, i );
@@ -372,12 +367,14 @@ float Density( const int i ) {
 		Vec3 xj = g_particles[ idx ].pos;
 		float dist = ( xi - xj ).GetMagnitude();
 		float weight = PARTICLE_MASS * Kernel_Spiky( dist );
-		sum += weight;
+		density += weight;
 	}
 
-	return sum;
+	if ( density < TARGET_DENSITY ) {
+		density = TARGET_DENSITY;
+	}
+	return density;
 }
-
 
 /*
 ====================================
@@ -417,7 +414,7 @@ PressureForce
 ====================================
 */
 Vec3 PressureForce( const int i ) {
-	Vec3 f = Vec3( 0, 0, 0 );
+	Vec3 force = Vec3( 0, 0, 0 );
 
 	const Vec3 xi = g_particles[ i ].pos;
 	const float pi = g_particles[ i ].pressure;
@@ -437,16 +434,16 @@ Vec3 PressureForce( const int i ) {
 		float dist = dx.GetMagnitude();
 
 		Vec3 dir = ( xj - xi ) / dist;
+		dir = xj - xi;
+		dir.Normalize();
 		float pj = g_particles[ idx ].pressure;
 		float dj = g_particles[ idx ].density;
 
 		Vec3 grad = Kernel_Spiky_Gradient( dist, dir );
-		if ( di > 0.001f && dj > 0.001f && grad.GetLengthSqr() > 0.001f ) {
-			f -= grad * PARTICLE_MASS * PARTICLE_MASS * ( pi / ( di * di ) + pj / ( dj * dj ) );
-		}
+		force -= grad * PARTICLE_MASS * PARTICLE_MASS * ( pi / ( di * di ) + pj / ( dj * dj ) );
 	}
 
-	return f;
+	return force;
 }
 
 /*
@@ -455,7 +452,7 @@ ViscosityForce
 ====================================
 */
 Vec3 ViscosityForce( const int i ) {
-	Vec3 f = Vec3( 0, 0, 0 );
+	Vec3 force = Vec3( 0, 0, 0 );
 
 	Vec3 xi = g_particles[ i ].pos;
 	Vec3 vi = g_particles[ i ].vel;
@@ -475,28 +472,31 @@ Vec3 ViscosityForce( const int i ) {
 
 		Vec3 vj = g_particles[ idx ].vel;
 		float dj = g_particles[ idx ].density;
-		if ( dj > 0.001f ) {
-			f += ( ( vj - vi ) / dj ) * VISCOSITY_COEFFICIENT * PARTICLE_MASS * PARTICLE_MASS * Kernel_Spiky_2ndDerivative( dist );
-		}
+
+		force += ( ( vj - vi ) / dj ) * VISCOSITY_COEFFICIENT * PARTICLE_MASS * PARTICLE_MASS * Kernel_Spiky_2ndDerivative( dist );
 	}
 
-	return f;
+	return force;
 }
 
 extern void FluidSimGPU();
 
+/*
+====================================
+FluidSimStep
+====================================
+*/
 void FluidSimStep( float dt ) {
-	dt = 1.0f / 60.0f;// 0.1667f;	// Fix the time-step to 60fps
-
+#if !defined( FLUID_SIM_CPU )
 	FluidSimGPU();
-	return;
+#else
+	dt = 1.0f / 60.0f;// 0.1667f;	// Fix the time-step to 60fps
 
 	// Prediction + Gravity
 	for ( int i = 0; i < MAX_PARTICLES; i++ ) {
 		fluid_t & pt = g_particles[ i ];
 		pt.posOld = pt.pos;
 		pt.vel.z += -0.10f * dt;
-		//pt.vel.z += -1.10f * dt;
 		pt.pos = pt.pos + pt.vel * dt;
 	}
 
@@ -506,23 +506,19 @@ void FluidSimStep( float dt ) {
 
 	// Calculate densities
 	for ( int i = 0; i < MAX_PARTICLES; i++ ) {
-		Vec3 pos = g_particles[ i ].pos;
-		g_particles[ i ].density = Density_SL( pos, i );
+		g_particles[ i ].density = Density_SL( i );
 	}
 
 	// Integrate
 	for ( int i = 0; i < MAX_PARTICLES; i++ ) {
 		// Calculate pressure force
-		Vec3 pressureForce = PressureForce_SL( g_particles[ i ].pos, i );
+		Vec3 pressureForce = PressureForce_SL( i );
 
 		// Calculate viscosity force
 		Vec3 viscosityForce = ViscosityForce_SL( i );
 
 		Vec3 force = pressureForce + viscosityForce;
-		Vec3 a = force / g_particles[ i ].density;
-		if ( !a.IsValid() ) {
-			a.Zero();
-		}
+		Vec3 a = force / PARTICLE_MASS;
 
 		g_particles[ i ].vel += a * dt;
 		//g_particles[ i ].vel = a * dt;
@@ -537,7 +533,7 @@ void FluidSimStep( float dt ) {
 		g_particles[ i ].density = Density( i );
 	}
 
-	// Calculate pressure
+	// Calculate pressures
 	for ( int i = 0; i < MAX_PARTICLES; i++ ) {
 		g_particles[ i ].pressure = Pressure( i );
 	}
@@ -549,12 +545,13 @@ void FluidSimStep( float dt ) {
 
 		// Calculate viscosity force
 		Vec3 viscosityForce = ViscosityForce( i );
+		viscosityForce.Zero();
 
 		Vec3 force = viscosityForce + pressureForce;
 		Vec3 a = force / PARTICLE_MASS;
 
 		g_particles[ i ].vel += a * dt;
-		//g_particles[ i ].vel.x = 0;
+		g_particles[ i ].vel.x = 0;
 		g_particles[ i ].pos = g_particles[ i ].posOld + g_particles[ i ].vel * dt;
 	}
 #endif
@@ -570,7 +567,7 @@ void FluidSimStep( float dt ) {
 		Vec3 & vel = g_particles[ i ].vel;
 
 		// Handle collisions
-		const float restitution = 0.059f;
+		const float restitution = 0.59f;
 		for ( int j = 0; j < 3; j++ ) {
 			if ( pos[ j ] < g_particleBounds.mins[ j ] ) {
 				pos[ j ] = g_particleBounds.mins[ j ];
@@ -583,4 +580,5 @@ void FluidSimStep( float dt ) {
 			}
 		}
 	}
+#endif
 }

@@ -6,7 +6,7 @@ struct fluid_t {
 	float pad0;
 
 	vec3 vel;
-	float pad1;
+	float pressure;
 
 	vec3 posOld;
 	float density;
@@ -35,6 +35,10 @@ layout ( local_size_x = WORK_GROUP_SIZE, local_size_y = 1, local_size_z = 1 ) in
 uniform int MAX_PARTICLES;
 uniform int NUM_CELLS;
 uniform float PARTICLE_RADIUS;
+
+uniform float TARGET_DENSITY;
+uniform float SPEED_OF_SOUND;
+uniform float PRESSURE_GAMMA;
 
 
 #define FS_PI 3.1415f
@@ -197,6 +201,76 @@ float Density_SL( vec3 pt, int skip ) {
 	return density;
 }
 
+float Density( const int i ) {
+	const float mass = 1;
+	float sum = 0;
+
+	int neighborKeys[ 27 ];
+	GetNearbyKeys( particles[ i ].pos, neighborKeys );
+
+	// Loop over the 3x3x3 cube of grid cells to find neighbors
+	for ( int k = 0; k < 27; k++ ) {
+		int key = neighborKeys[ k ];
+		int start = startIndices[ key ];
+		if ( start >= MAX_PARTICLES ) {
+			continue;
+		}
+
+		// Loop over neighbors in this cell
+		for ( int j = start; j < MAX_PARTICLES; j++ ) {
+			if ( key != sorted[ j ].key ) {
+				break;
+			}
+
+			int idx = sorted[ j ].idx;
+			if ( idx == i ) {
+				continue;
+			}
+
+			vec3 xi = particles[ i ].pos;
+			vec3 xj = particles[ idx ].pos;
+			float dist = length( xi - xj );
+			//float weight = PARTICLE_MASS * Kernel_Spiky( dist );
+			float weight = mass * Kernel_SL_smooth( dist );
+			sum += weight;
+		}
+	}
+
+	return sum;
+}
+
+/*
+====================================
+PressureEOS
+====================================
+*/
+float PressureEOS( float density, float targetDensity, float eosScale, float eosExponent, float negativePressureScale ) {
+	float p = eosScale / eosExponent * ( pow( ( density / targetDensity ), eosExponent ) - 1.0f );
+	
+	if ( p < 0 ) {
+		p *= negativePressureScale;
+	}
+
+	return p;
+}
+
+/*
+====================================
+Pressure
+====================================
+*/
+float Pressure( const int i ) {
+	float p = 0;
+
+	float di = particles[ i ].density;
+
+	float targetDensity = TARGET_DENSITY;
+	float eosScale = targetDensity * SPEED_OF_SOUND * SPEED_OF_SOUND / PRESSURE_GAMMA;
+
+	p = PressureEOS( di, targetDensity, eosScale, PRESSURE_GAMMA, 0.0f );
+	return p;
+}
+
 /*
 ==========================
 main
@@ -208,5 +282,6 @@ void main() {
 		return;
 	}
 
-	particles[ thread_id ].density = Density_SL( particles[ thread_id ].pos, thread_id );
+	particles[ thread_id ].density = Density( thread_id );
+	particles[ thread_id ].pressure = Pressure( thread_id );
 }

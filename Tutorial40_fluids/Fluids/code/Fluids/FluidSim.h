@@ -6,11 +6,24 @@
 #include "Math/Quat.h"
 #include "Math/Matrix.h"
 
+#define FLUID_SIM_CPU // toggle to switch between cpu and gpu sims
+
 #define SIDE_SIZE 24
-//#define MAX_PARTICLES ( SIDE_SIZE * SIDE_SIZE )
-#define MAX_PARTICLES ( SIDE_SIZE * SIDE_SIZE * SIDE_SIZE )
+#if defined( FLUID_SIM_CPU )
+#define MAX_PARTICLES ( SIDE_SIZE * SIDE_SIZE )
+
 #define PARTICLE_MASS 1
 #define PARTICLE_RADIUS 0.25f
+
+#else
+#define MAX_PARTICLES ( SIDE_SIZE * SIDE_SIZE * SIDE_SIZE )
+
+#define PARTICLE_MASS 1
+#define PARTICLE_RADIUS 1.25f
+#endif
+
+#define FS_PI 3.1415f
+
 
 struct fluid_t {
 	Vec3 pos;
@@ -27,16 +40,3 @@ extern fluid_t g_particles[ MAX_PARTICLES ];
 
 void ResetFluidSim();
 void FluidSimStep( float dt );
-
-
-
-
-#define FS_PI 3.1415f
-#define SPEED_OF_SOUND 1.0f
-#define VISCOSITY_COEFFICIENT 0.001f
-#define TARGET_DENSITY ( g_targetDensity )
-#define PRESSURE_MULTIPLIER 0.25f
-#define PRESSURE_GAMMA 1.0f
-
-#define NEGATIVE_PRESSURE_SCALE 1.0f
-#define VISCOSITY_STRENGTH 0.185f

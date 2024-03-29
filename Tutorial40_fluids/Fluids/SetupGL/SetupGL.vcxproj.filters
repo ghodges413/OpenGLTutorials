@@ -265,6 +265,9 @@
     <ClCompile Include="..\code\Graphics\ShaderStorageBuffer.cpp">
       <Filter>code\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="..\code\Fluids\FluidSimGPU.cpp">
+      <Filter>code\Fluids</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\code\Math\Bounds.h">
@@ -506,6 +509,9 @@
     </ClInclude>
     <ClInclude Include="..\code\Graphics\ShaderStorageBuffer.h">
       <Filter>code\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\code\Fluids\FluidSimGPU.h">
+      <Filter>code\Fluids</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

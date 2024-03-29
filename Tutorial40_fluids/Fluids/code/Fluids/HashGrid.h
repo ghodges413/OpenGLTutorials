@@ -15,6 +15,3 @@ void GetNeighborIds( std::vector< int > & ids, const int idx );
 
 void UpdateCells( fluid_t * points );
 void GetNeighborIds_Cells( std::vector< int > & ids, const int idx );
-
-
-void InitGPUHashGrid();
