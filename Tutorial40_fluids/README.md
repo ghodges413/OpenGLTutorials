@@ -221,11 +221,11 @@ $$= \frac{ f^{i+1, j, k} - 2f^{i, j, k} + f^{i-1, j, k} }{ \Delta x^2 }$$
 
 Gradient:
 
-$$\nabla f(x) = \left( \frac{ f^{i+1, j, k} - f{i-1, j, k} }{ 2 \Delta x }, \frac{ f^{i, j+1, k} - f{i, j-1, k} }{ 2 \Delta y }, \frac{ f^{i, j, k+1} - f{i, j, k-1} }{ 2 \Delta z } \right)$$
+$$\nabla f(x) = \left( \frac{ f^{i+1, j, k} - f^{i-1, j, k} }{ 2 \Delta x }, \frac{ f^{i, j+1, k} - f^{i, j-1, k} }{ 2 \Delta y }, \frac{ f^{i, j, k+1} - f^{i, j, k-1} }{ 2 \Delta z } \right)$$
 
 Divergence:
 
-$$\nabla \cdot F(x) = \frac{ F_x^{i+1, j, k} - F_x{i-1, j, k} }{ 2 \Delta x } + \frac{ F_y^{i, j+1, k} - F_y{i, j-1, k} }{ 2 \Delta y } + \frac{ F_z^{i, j, k+1} - F_z{i, j, k-1} }{ 2 \Delta z }$$
+$$\nabla \cdot F(x) = \frac{ F_x^{i+1, j, k} - F_x^{i-1, j, k} }{ 2 \Delta x } + \frac{ F_y^{i, j+1, k} - F_y^{i, j-1, k} }{ 2 \Delta y } + \frac{ F_z^{i, j, k+1} - F_z^{i, j, k-1} }{ 2 \Delta z }$$
 
 Curl:
 
