@@ -182,9 +182,162 @@ $$f_v = -m \sum_j \left( \frac{ u_j - u_i }{ \rho_j } \right) \nabla^2 W( x - x_
 
 As for handling collision with external geometry, the collision can be resolved using the projection method.  The velocity normal to the surface is negated and reduced by the coefficient of restitution, and the tangential velocity is scaled by the friction.
 
+#### Sorting
+
+This simulation uses a bitonic sorting algorithm that was adapted from Sebastian Lague's "Fluid Simulation".
+
+As a note to myself, for games, where perfect accuracy isn't necessary.  The bitonic sort could probably be replaced with an incomplete sorting algorithm.  If the fluid particles don't move too much from frame to frame, and the grid is organized in memory so that each neighboring cell is nearby (morton order perhaps).  Then a complete sort wouldn't be required each frame, since the particles are already mostly sorted.  This should significantly speed up the simulation.
+
 ## Eulerian Framework
 
 The Eulerian framework is a simulation that represents fuild with a grid.
+
+The grids can be square or cubic.  But they don't have to be.  There's also curvilinear grids and irregular or triangulated/tetrahedral grids.  The grids can also be body, face, edge, or vertex centered.  And they may contain scalar or vector data.
+
+### Differential Operators
+
+#### Finite Difference
+
+Forward difference:
+
+$$\frac{ \partial f }{ \partial x } = \frac{ f^{i+1, j, k} - f{i, j, k} }{ \delta x }$$
+
+Backward difference:
+
+$$\frac{ \partial f }{ \partial x } = \frac{ f^{i, j, k} - f{i-1, j, k} }{ \delta x }$$
+
+Center difference:
+
+$$\frac{ \partial f }{ \partial x } = \frac{ f^{i+1, j, k} - f{i-1, j, k} }{ 2 \delta x }$$
+
+For the second order derivative, let's first define $g$:
+
+$$g^{i+1/2, j, k } = \frac{ f^{i+1, j, k} - f^{i, j, k} }{ \delta x }$$
+
+$$g^{i-1/2, j, k } = \frac{ f^{i, j, k} - f^{i-1, j, k} }{ \delta x }$$
+
+$$\frac{ \partial^2 f }{ \partial x^2 } = \frac{ g^{i+1/2, j, k} - g^{i-1/2, j, k }{ \delta x }$$
+$$= \frac{ f^{i+1, j, k} - 2f^{i, j, k} + f^{i-1, j, k} }{ \delta x^2 }$$
+
+Gradient:
+
+$$\nabla f(x) = \left( \frac{ f^{i+1, j, k} - f{i-1, j, k} }{ 2 \delta x }, \frac{ f^{i, j+1, k} - f{i, j-1, k} }{ 2 \delta y }, \frac{ f^{i, j, k+1} - f{i, j, k-1} }{ 2 \delta z } \right)$$
+
+Divergence:
+
+$$\nabla \cdot F(x) = \frac{ F_x^{i+1, j, k} - F_x{i-1, j, k} }{ 2 \delta x } + \frac{ F_y^{i, j+1, k} - F_y{i, j-1, k} }{ 2 \delta y } + \frac{ F_z^{i, j, k+1} - F_z{i, j, k-1} }{ 2 \delta z }$$
+
+Curl:
+
+$$\nabla \cross F(x) = \left( \frac{ F_z^{i, j+1, k} - F_z{i, j-1, k} }{ \delta y } - \frac{ F_y^{i, j, k+1} - F_y{i, j, k-1} }{ \delta z } \right) \hat x$$
+$$+ \left( \frac{ F_x^{i, j, k+1} - F_x{i, j, k-1} }{ \delta z } - \frac{ F_z^{i+1, j, k} - F_z{i-1, j, k} }{ \delta x } \right) \hat y$$
+$$+ \left( \frac{ F_y^{i+1, j, k} - F_y{i-1, j, k} }{ \delta x } - \frac{ F_x^{i, j+1, k} - F_x{i, j-1, k} }{ \delta y } \right) \hat z$$
+
+Laplacian:
+
+$$\nabla^2 f(x) = \frac{ f^{i+1, j, k} - 2f^{i, j, k} + f^{i-1, j, k} }{ \delta x^2 }$$
+$$+ \frac{ f^{i, j+1, k} - 2f^{i, j, k} + f^{i, j-1, k} }{ \delta y^2 }$$
+$$+ \frac{ f^{i, j, k+1} - 2f^{i, j, k} + f^{i, j, k-1} }{ \delta z^2 }$$
+
+### Simulation
+
+#### Collision Handling
+
+The grid based system uses signed distance fields to handle collision.
+
+The boundary condition at the surface is $u \cdot n = 0$, this is the no flux boundary condition, as it requires the velocity to be tangent to the surface.
+
+This can be extended to scalar fields with the Neumann and Dirichlet conditions.
+
+Neumann:
+
+$$\frac{ \partial f }{ \partial n } = c$$
+
+Dirichlet:
+
+$$f = c$$
+
+There's also slip/no-slip boundary conditions that affect the tangent component of the velocity field:
+
+$$u_t = max \left( 1 - \mu \frac{ max( -u \cdot n, 0 ) }{ \abs{ u_t } } \right) u_t$$
+
+#### Advection
+
+In order to integrate the simulation forward, we actually need to step backwards.  This is because the grid cells are calculated at a specific location, but the flows do not necessarily go from grid point to point.  Since we can sample the grid anywhere and lerp between values, we calculate the grid at each specific point and use the past for sampling.  See "Fluid Engine Development", section 3.4.2.1 Semi-Lagrangian Method for an illustration in Figure 3.10.
+
+$$f(x)^{n+1} = f(x - \delta t u )^n$$
+
+The advection equation is:
+
+$$\frac{ \partial f }{ \partial t } + u \cdot \nabla f = 0$$
+
+For one dimension:
+
+$$\frac{ \partial f }{ \partial t } = -u \frac{ \partial f }{ \partial x }$$
+
+And using the Euler method to approximate it:
+
+$$f_i^{t+\delta t} = f_i^t - \delta t u \frac{ f_i^t - f_{i-1}^t }{ \delta x }$$
+
+This can have some accuracy issues in circular flows.  And to improve accuracy, you can use the midpoint method.  The midpoint method uses a half time step to go backwards, and then resamples the velocity, using the resample velocity to make the full step backward to get the previous sample point.
+
+Interpolation can be improved by using Catmull-Rom interpolation instead of linear interpolation.
+
+#### Diffusion/Viscosity
+
+$$a_v = \mu \nabla^2 u$$
+
+This can be integrated with Euler integration:
+
+$$u^{n+1} = u^n + \delta t \mu \nabla^2 u^n$$
+
+Improving the accuracy using backward Euler:
+
+$$f_{i,j,k}^{n+1} = f_{i,j,k}^n + \delta t \mu L( f_{i,j,k}^n )$$
+
+Where $L$ is the central differencing defined above.
+
+In order to further increase the accuracy of the simulation.  The entire grid needs to be notified of all the changes at each point, all at once.  This requires build a large matrix that results in the linear complimentary problem:
+
+$$A \cdot x = b$$
+
+If the diffusion coefficient and time steps are high, then this can be solved with conjugate gradient methods.  Otherwise, this can be solved using Gauss-Seidel or Jacobi methods.
+
+#### Pressure
+
+$$a_p = - \frac{ \nabla p }{ \rho }$$
+
+Euler method gives us:
+
+$$u^{n+1} = u^n - \delta t \frac{ \nabla p }{ \rho }$$
+
+This will also result in a large matrix that needs to be solved using LCP methods.
+
+#### Buoyancy Force
+
+The buoyancy force can be described with the following equation:
+
+$$\nabla \cdot \frac{ \nabla p }{ \rho } = c \frac{ \nabla \cdot u }{ \delta t }$$
+
+## Hybrid Methods
+
+### Particle-in-Cell
+
+The idea of the particle in the cell is to update positions using particles and to update velocities using grid cells.  The method involves the following steps:
+
+- Transfer particle velocities into grid cells
+- Compute non-advection forces
+- Transfer velocities back to particles
+- Move the particles
+
+### Fluid-Implicit Particle Method (FLIP)
+
+FLIP is an adaptation of the PIC method.  The difference is that the PIC method interpolates the velocities when transfer them from the grid to the particle, and the FLIP method interpolates the velocity deltas instead.
+
+
+### Other methods
+
+There's also Particle Level Set and Vortex Particle.  It's also good to remember that fluid simulation is an area of active research and there's always new improvements, such as Sparse Voxel Grids.
 
 
 ## References
@@ -193,7 +346,7 @@ The Eulerian framework is a simulation that represents fuild with a grid.
 
 "Fluid Engine Development" by Doyub Kim
 
-"Smoothed Particle Hydrodynamics Techniques for the PHysics Based Simulation of Fluids and Solids", Dan Koschier
+"Smoothed Particle Hydrodynamics Techniques for the Physics Based Simulation of Fluids and Solids", Dan Koschier
 
 "Particle-based Viscoelastic Fluid Simulation", Simon Clavet
 
